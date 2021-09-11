@@ -1,10 +1,10 @@
 <template>
   <div class="expandable" :style="{'--content-height': contentHeight}">
     <div class="expandable__header">
-      <slot name="header" :toggle="toggle" :expand="expand" :collapse="collapse"/>
+      <slot name="header" :id="id" :expanded="expanded"/>
     </div>
     <div class="expandable__content" ref="expandable__content">
-      <slot name="content" :toggle="toggle" :expand="expand" :collapse="collapse"/>
+      <slot name="content" :id="id" :expanded="expanded"/>
     </div>
   </div>
 </template>
@@ -34,15 +34,6 @@ export default {
     });
   },
   methods: {
-    expand() {
-      this.$emit("expand", this.id);
-    },
-    collapse() {
-      this.$emit("collapse", this.id);
-    },
-    toggle() {
-      this.$emit("toggle", this.id);
-    },
     handleExpand(toBeExpanded) {
       if (this.$el.classList.contains("expanded") !== toBeExpanded) {
         this.contentHeight = this.$refs.expandable__content.scrollHeight + "px";
@@ -64,7 +55,6 @@ export default {
 
 <style>
 .expandable > .expandable__content {
-  background: #fff;
   overflow: hidden;
   transition: height 0.5s;
 }
