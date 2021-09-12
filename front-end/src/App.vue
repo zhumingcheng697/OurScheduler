@@ -207,7 +207,7 @@ export default {
 
         const target = this.schoolNameTemp;
 
-        axios.get(`http://localhost:4000/search/${target}`).then(({ data }) => {
+        axios.get(`https://ourscheduler.herokuapp.com/search/${target}`).then(({ data }) => {
           if (typeof data === "string") {
             this.schoolId = data;
             this.schoolNameSet = this.schoolNameTemp;
@@ -238,7 +238,7 @@ export default {
       const school = this.schoolId.toLowerCase();
       const target = this.classTemp.toUpperCase();
       try {
-        axios.get(`http://localhost:4000/retrieve/${school}/${target}`).then(({ data }) => {
+        axios.get(`https://ourscheduler.herokuapp.com/retrieve/${school}/${target}`).then(({ data }) => {
           this.classTemp = "";
 
           if (data) {
@@ -300,8 +300,8 @@ export default {
       this.generatedSchedules = null;
 
       try {
-        axios.get(`http://localhost:4000/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
-          console.log(data[0]);
+        axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
+          console.log(data);
           this.runD3(data[0]);
           this.generatedSchedules = data;
           this.loading = false;
@@ -398,7 +398,11 @@ export default {
       barGroups.append("text").attr("font-family", "Helvetica").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.textColor).attr("x", d => 10 + margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
 // Actually add the element to the page
-      this.$refs["d3-schedule"].append(svg.node());
+      const element = this.$refs["d3-schedule"];
+      while (element.firstChild) {
+        element.removeChild(element.firstChild)
+      }
+      element.append(svg.node());
       // document.body.append(svg.node());
 // This part ^ always goes at the end of our index.js
 

@@ -4,24 +4,24 @@
  */
 
 async function main(packageIn) {
-    let data = {},
-        locked = [],
-        restrictions = {
-            minCredit: 0,
-            maxCredit: 100,
-            minCourses: 0,
-            maxCourses: 100
-        };
-    try {
+    // let data = {},
+    //     locked = [],
+    //     restrictions = {
+    //         minCredit: 0,
+    //         maxCredit: 100,
+    //         minCourses: 0,
+    //         maxCourses: 100
+    //     };
+    // try {
         let _package = packageIn;
-        data = [];
+        let data = [];
         for (let _class of _package.classList) {
-            data.push(await require("../scraper/retrieve.js")(_class[0], _class[1]));
+            data.push(await require("./retrieve")(_class[0], _class[1]));
         }
-        locked = _package.locked;
-        restrictions = _package.restrictions;
+        let locked = _package.locked;
+        let restrictions = _package.restrictions;
 
-    } finally {
+    // } finally {
         function getClassData(
             _data,
             _locked = [],
@@ -189,7 +189,7 @@ async function main(packageIn) {
                     if (ts.length == 0) {
                         continue;
                     }
-                    _class = classData[classes[numClasses - classIdx - 1]]
+                    let _class = classData[classes[numClasses - classIdx - 1]]
                     for (let time of ts) {
                         const slot = new TimeSlot(
                             _class.name,
@@ -231,8 +231,9 @@ async function main(packageIn) {
             }
         }
 
+        console.log(_export);
         return _export;
-    }
+    // }
 }
 
 module.exports = main;
