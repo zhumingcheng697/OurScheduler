@@ -196,6 +196,9 @@ export default {
         this.classesSet = [];
         this.generatedSchedules = null;
       } else {
+        setTimeout(() => {
+          this.expandedSection = "classes";
+        }, 10);
         return;
       }
 
