@@ -301,7 +301,6 @@ export default {
 
       try {
         axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
-          console.log(data);
           this.runD3(data[0]);
           this.generatedSchedules = data;
           this.loading = false;
