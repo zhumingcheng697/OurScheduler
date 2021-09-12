@@ -1,4 +1,4 @@
-data = {
+const data = {
     classList: [
         ["nyu", "CSUY 2214"],
         ["nyu", "CSUY 2215"],
@@ -11,7 +11,7 @@ data = {
         "DISCRETE MATHEMATICS III",
         "DISCRETE MATHEMATICS IV"
     ],
-    restrictions = {
+    restrictions: {
         minCredit: 0,
         maxCredit: 100,
         minCourses: 0,
