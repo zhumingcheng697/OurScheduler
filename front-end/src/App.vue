@@ -66,7 +66,8 @@
         </template>
         <template #content>
           <form @submit.prevent="generateSchedule">
-            <p class="clickable" @click="expandedSection = 'university'"><strong>{{ schoolNameSet.toUpperCase() }}</strong></p>
+            <p class="clickable" @click="expandedSection = 'university'">
+              <strong>{{ schoolNameSet.toUpperCase() }}</strong></p>
             <p class="clickable" @click="expandedSection = 'amount'">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
               <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
@@ -90,7 +91,7 @@
           </div>
         </template>
         <template #content>
-          <h2 class="centered-text">d3 schedule goes here</h2>
+          <div id="d3-schedule" ref="d3-schedule"></div>
         </template>
       </Expandable>
     </div>
@@ -99,6 +100,7 @@
 </template>
 
 <script>
+import * as d3 from "d3";
 import axios from "axios";
 import Expandable from "./components/Expandable.vue";
 
@@ -296,13 +298,13 @@ export default {
       };
 
       this.generatedSchedules = null;
-      // this.generatedSchedules = [];
 
       try {
         axios.get(`http://localhost:4000/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
-          console.log(data)
+          console.log(data[0]);
+          this.runD3(data[0]);
+          this.generatedSchedules = data;
           this.loading = false;
-
           setTimeout(() => {
             this.expandedSection = "schedules";
           }, 10);
@@ -316,6 +318,90 @@ export default {
         alert("Unfortunately, something went wrong.");
         this.loading = false;
       }
+    },
+    runD3(schedules) {
+
+      const STIME = 1605070800000;
+      const ETIME = 1605157200000;
+      const calendarEvents = [
+        {
+          timeFrom: STIME,
+          timeTo: STIME,
+          title: "",
+          background: "#EBECF0",
+          day: 0
+        },
+        {
+          timeFrom: ETIME,
+          timeTo: ETIME,
+          title: "",
+          background: "#EBECF0",
+          day: 0
+        }
+      ];
+      for (let i = 0; i < schedules.length; i++) {
+        calendarEvents.push({
+          timeFrom: schedules[i][1][0] % 1440 * 60000 + STIME,
+          timeTo: schedules[i][1][1] % 1440 * 60000 + STIME,
+          title: schedules[i][0],
+          background: "#EBECF0",
+          day: parseInt(schedules[i][1][0] / 1440)
+        });
+      }
+// Make an array of dates to use for our yScale later on
+      const dates = [
+        ...calendarEvents.map(d => new Date(d.timeFrom)),
+        ...calendarEvents.map(d => new Date(d.timeTo))
+      ];
+      const margin = { top: 30, right: 30, bottom: 30, left: 50 }; // Gives space for axes and other margins
+      const height = 1500;
+      const width = 1050;
+      const barWidth = 900;
+      const barHeight = 1475;
+      // const nowColor = "#EA4335";
+      const barStyle = {
+        background: "#616161",
+        textColor: "black",
+        dayColor: "black",
+        width: barWidth,
+        height: barHeight,
+        startPadding: 2,
+        endPadding: 3,
+        radius: 3
+      };
+// Create the SVG element
+      const svg = d3.create("svg").attr("width", width).attr("height", height);
+// All further code additions will go just below this line
+      const yScale = d3.scaleTime().domain([d3.min(dates), d3.max(dates)]).range([margin.top, height - margin.bottom]);
+      const yAxis = d3.axisLeft().ticks(24).scale(yScale);
+
+      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.5).call(yAxis);
+      svg.selectAll("g.tick").filter((d, i, ticks) => i === 0 || i === ticks.length - 1).select("text").text("12 AM");
+
+      const gridLines = d3.axisRight().ticks(24).tickSize(barStyle.width) // even though they're "ticks" we've set them to be full-width
+          .tickFormat("").scale(yScale);
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 85).attr("y", 15).text("Monday");
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 235).attr("y", 15).text("Tuesday");
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 370).attr("y", 15).text("Wednesday");
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 530).attr("y", 15).text("Thursday");
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 695).attr("y", 15).text("Friday");
+      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 835).attr("y", 15).text("Saturday");
+      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.3).call(gridLines);
+      const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
+      barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("x", d => margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + barStyle.startPadding).attr("height", d => {
+        const startPoint = yScale(new Date(d.timeFrom));
+        const endPoint = yScale(new Date(d.timeTo));
+        return (
+            endPoint - startPoint - barStyle.endPadding - barStyle.startPadding
+        );
+      }).attr("width", barWidth / 6).attr("rx", barStyle.radius);
+      barGroups.append("text").attr("font-family", "Helvetica").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.textColor).attr("x", d => 10 + margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
+
+// Actually add the element to the page
+      this.$refs["d3-schedule"].append(svg.node());
+      // document.body.append(svg.node());
+// This part ^ always goes at the end of our index.js
+
     }
   }
 };

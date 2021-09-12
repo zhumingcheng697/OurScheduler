@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const generator = require("../../algo/generator");
+const generator = require("../generator");
 
 router.get("/", (req, res) => {
     const target = req.query && req.query.prop;
