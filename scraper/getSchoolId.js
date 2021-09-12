@@ -2,7 +2,7 @@ const puppeteer = require("puppeteer-extra");
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
 const solve = require("./solve.js");
 
-async function getSchoolUrl(target, dev) {
+async function getSchoolId(target, dev) {
     puppeteer.use(pluginStealth());
 
     const browser = await puppeteer.launch({
@@ -14,7 +14,7 @@ async function getSchoolUrl(target, dev) {
         const page = await browser.newPage();
 
         await page.goto(
-            `https://www.google.com/search?q=${target}+Coursicle`
+            `https://www.google.com/search?q=${target.replace(/\s/g, "+")}+Coursicle`
         );
 
         await page.waitForFunction(() =>
@@ -29,13 +29,16 @@ async function getSchoolUrl(target, dev) {
             await solve(page);
         }
 
-        return await page.evaluate( () => {
-            document.querySelectorAll(`#search div a`).forEach((el) => {
-                const match = el.href.match(/\/\/www.coursicle.com\/([^\/]+)\//);
+        return await page.evaluate(() => {
+            const anchors = document.querySelectorAll(`#search div a`);
+
+            for (let index = 0; index < anchors.length; ++index) {
+                console.log(anchors[index].href)
+                const match = anchors[index].href.match(/\/\/www.coursicle.com\/([^\/]+)\//);
                 if (match && match[1]) {
                     return match[1];
                 }
-            })
+            }
         });
     } catch (e) {
         console.error(e);
@@ -44,11 +47,11 @@ async function getSchoolUrl(target, dev) {
     }
 }
 
-(async () => {
-    for (const school in ["New York University", "UCB", "UNC", "Cornell", "MIT"]) {
-        const webUrl = await getSchoolUrl(school, true);
-        console.log(webUrl);
-    }
-})();
+// (async () => {
+//     for (const school of ["New York University", "UNC", "Cornell", "University of Southern California", "UCB", "Penn State"]) {
+//         const webUrl = await getSchoolUrl(school, true);
+//         console.log(webUrl);
+//     }
+// })();
 
-module.exports = getSchoolUrl;
+module.exports = getSchoolId;

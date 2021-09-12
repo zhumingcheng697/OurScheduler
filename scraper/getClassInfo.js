@@ -139,10 +139,10 @@ async function getClassInfo(schoolCode, target, dev) {
     }
 }
 
-module.exports = getClassInfo;
-
 // (async () => {
 //     const classesInfo = await getClassInfo("nyu", "mauy 2314", true);
 //     console.log(classesInfo);
 //     require("./insert")("nyu", classesInfo);
 // })();
+
+module.exports = getClassInfo;
