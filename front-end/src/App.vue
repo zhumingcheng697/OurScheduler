@@ -27,8 +27,8 @@
       </template>
       <template #content>
         <form @submit.prevent="addClass">
-          <label for="class-name">Class Name</label>
-          <input class="centered-text" id="class-name" type="text" v-model="classTemp" placeholder="Social Distancing 101">
+          <label for="class-name">Class Code</label>
+          <input class="centered-text" id="class-name" type="text" v-model="classTemp" placeholder="CS 101">
           <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
           <ul v-if="classesSet.length">
             <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
@@ -99,7 +99,7 @@ export default {
       schoolNameTemp: "",
       schoolNameSet: "",
       classTemp: "",
-      classesSet: [{ locked: true, name: "Hand Washing 202" }, { locked: false, name: "Hand Washing 203" }],
+      classesSet: [],
       classAmountTemp: "",
       creditAmountTemp: "",
       classAmountSet: null,
