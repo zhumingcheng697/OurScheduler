@@ -67,7 +67,7 @@
         <template #content>
           <form @submit.prevent="generateSchedule">
             <p class="clickable" @click="expandedSection = 'university'">
-              <strong>{{ schoolId.toUpperCase() }}</strong></p>
+              <strong>{{ schoolId }}</strong></p>
             <p class="clickable" @click="expandedSection = 'amount'">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
               <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
@@ -146,6 +146,9 @@ export default {
           }
           break;
       }
+    },
+    classesSet() {
+      this.generatedSchedules = null;
     }
   },
   mounted() {
@@ -211,7 +214,7 @@ export default {
 
         axios.get(`https://ourscheduler.herokuapp.com/search/${target}`).then(({ data }) => {
           if (typeof data === "string") {
-            this.schoolId = data;
+            this.schoolId = data.toUpperCase();
             this.expand("classes");
 
             setTimeout(() => {
@@ -240,9 +243,9 @@ export default {
       const target = this.classTemp.toUpperCase();
       try {
         axios.get(`https://ourscheduler.herokuapp.com/retrieve/${school}/${target}`).then(({ data }) => {
-          this.classTemp = "";
-
           if (data) {
+            this.classTemp = "";
+
             const displayName = `${data.name} (${data.label})`;
             if (!this.classesSet.find((el) => el.name === displayName)) {
               this.classesSet.push(Object.assign({ locked: false }, { name: displayName, label: data.label }));
@@ -405,7 +408,6 @@ export default {
       element.append(svg.node());
       // document.body.append(svg.node());
 // This part ^ always goes at the end of our index.js
-
     }
   }
 };
