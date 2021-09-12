@@ -2,122 +2,107 @@
  * @author Arthur Deng
  * Generate schedule
  */
-
+const data = {
+    "name": "test1",
+    "credits": 3,
+    "label": "TEST 001",
+    "lectures": [
+        ["-101", [540, 600],
+            [1800, 1860]
+        ],
+        ["-102", [600, 660],
+            [1860, 1920]
+        ]
+    ],
+    "extras": [
+        ["-A", [3200, 3260]],
+        ["-B", [3260, 3320]]
+    ]
+}
 const classData = {
     class_1: {
         name: "calculus",
+        credit: 3,
+        id: "MATH001",
+        locked: true,
         times: [
-            [ // option 1
-                [
-                    ["9:00", "10:00"],
-                    ["13:00", "15:00"]
-                ], // 2 sections on Monday, 9 to 10 and 1 to 3pm
-                [], // no sections on Tuesday for calculus
-                [], // none on Wednesday
-                [
-                    ["15:00", "17:00"]
-                ], // 3 - 5pm on thursday
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [540, 600, 'lab'],
+                [1800, 1860, 'lecture'],
+                [3600, 3660, 'lecture']
             ],
-            [ // option 2
-                [
-                    ["9:00", "10:00"]
-                ],
-                [],
-                [
-                    ["13:00", "15:00"]
-                ],
-                [
-                    ["15:00", "17:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [600, 700, 'lab'],
+                [1500, 1560, 'lecture'],
+                [3000, 3120, 'lecture']
             ]
         ]
     },
     class_2: {
-        name: "History",
+        name: "history",
+        credit: 3,
+        id: "Hist031",
+        locked: true,
         times: [
-            [ // option 1
-                [
-                    ["10:00", "11:00"],
-                    ["13:00", "15:00"]
-                ],
-                [],
-                [],
-                [
-                    ["17:00", "19:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [540, 700, 'lab'],
+                [1400, 1460, 'lecture'],
+                [3600, 3660, 'lecture']
             ],
-            [ // option 2
-                [
-                    ["10:00", "11:00"]
-                ],
-                [],
-                [
-                    ["12:00", "15:00"]
-                ],
-                [
-                    ["18:00", "19:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [1200, 1300, 'lab'],
+                [1500, 1560, 'lecture'],
+                [3000, 3120, 'lecture']
+            ]
+        ]
+    },
+    class_3: {
+        name: "Data Structures",
+        credit: 3,
+        id: "CS182",
+        locked: false,
+        times: [
+            [
+                [1, 2, 'lab'],
+                [10, 11, 'lecture'],
+                [12, 23, 'lecture']
+            ],
+            [
+                [1, 2, 'lab'],
+                [2, 3, 'lecture'],
+                [3000, 3120, 'lecture']
             ]
         ]
     }
 }
 
-const parseTimeToInt = (times) => {
-    const dict = {};
-    let i = 0;
-    for (const time of times) {
-        dict[time] = i;
-        i++;
-    }
-    return dict;
+let conditions = {
+    minCredit: 0,
+    maxCredit: 25,
+    minCourses: 0,
+    maxCourses: 6
 }
 
-
-
-
-
-
-let timeToInt = (time) => {
-    // time: "XX:XX"
-    const timeInt = time.split(":");
-    return 60 * parseInt(timeInt[0]) + parseInt(timeInt[1]);
-}
-
-
-
-let schedule = {}
-
-function TimeSlot(name, start, end, day) {
+function TimeSlot(name, id, start, end) {
     // name: String
     // start/end: time converted to int
     // day: int, 0 to 6
     this.name = name;
+    this.id = id;
     this.start = start;
     this.end = end;
-    this.day = day;
     this.log = () => {
-        console.log("day ", day)
-        console.log(start);
-        console.log(end);
-        console.log(name);
+        console.log(this.name);
+        console.log(this.id);
+        console.log(this.start);
+        console.log(this.end);
     }
 }
 
 function Schedule() {
     this.timeslots = [];
-    this.days = 7;
+    this.credits = 0;
+    this.numberOfCourses = 0;
     this.add = (ts) => {
         if (this.checkConflict(ts)) {
             return false;
@@ -132,9 +117,11 @@ function Schedule() {
             if (t.day != ts.day) {
                 continue;
             }
-            if (timeToInt(t.start) == timeToInt(ts.start) ||
-                (timeToInt(t.start) < timeToInt(ts.start) && timeToInt(t.end) > timeToInt(ts.start)) ||
-                (timeToInt(t.start) < timeToInt(ts.end) && timeToInt(t.start) > timeToInt(ts.start))) {
+            if (
+                (t.start == ts.start) ||
+                (t.start < ts.start && t.end > ts.start) ||
+                (t.start < ts.end && t.start > ts.start)
+            ) {
                 // check for conflict
                 return true;
             }
@@ -144,6 +131,11 @@ function Schedule() {
     this.print = () => {
         for (const ts of this.timeslots) {
             ts.log();
+        }
+    }
+    this.printCourses = () => {
+        for (const ts of this.timeslots) {
+            console.log(ts.id);
         }
     }
 }
@@ -158,30 +150,43 @@ function generate(classData) {
     for (const choice of choices) {
         let s = new Schedule(),
             valid = true;
-        for (let _class = 0; _class < numClasses; _class++) {
-            const ts = choice[_class]; // corresponds to the (numClasses - _class - 1)th 
+        for (let classIdx = 0; classIdx < numClasses; classIdx++) {
+            const ts = choice[classIdx]; // corresponds to the (numClasses - _class - 1)th 
             // class in the classData dictionary
-            for (let day = 0; day < s.days; day++) {
-                let timesInDay = ts[day];
-                for (let c of timesInDay) {
-                    const slot = new TimeSlot(
-                        classData[classes[numClasses - _class - 1]].name,
-                        c[0],
-                        c[1],
-                        day
-                    )
-                    let valid = s.add(slot);
-                    if (!valid) { break; }
-                }
+            if (ts.length == 0) {
+                continue;
+            }
+            _class = classData[classes[numClasses - classIdx - 1]]
+            for (let time of ts) {
+                const slot = new TimeSlot(
+                    _class.name,
+                    _class.id + time[2],
+                    time[0],
+                    time[1]
+                )
+                valid = s.add(slot);
                 if (!valid) { break; }
             }
+            s.credits += _class.credit;
+            s.numberOfCourses += 1;
             if (!valid) { break; }
         }
-        if (valid) {
+
+        if (valid && checkConditions(s, conditions)) {
             schedules.push(s);
         }
     }
     return schedules;
+}
+
+
+let checkConditions = (schedule, conditions) => {
+    return (
+        schedule.credits <= conditions.maxCredit &&
+        schedule.credits >= conditions.minCredit &&
+        schedule.numberOfCourses >= conditions.minCourses &&
+        schedule.numberOfCourses <= conditions.maxCourses
+    )
 }
 
 function iterate(idx, classes) {
@@ -192,10 +197,22 @@ function iterate(idx, classes) {
         ];
     }
     const below = iterate(idx - 1, classes);
-    for (const option of classData[classes[idx]].times) {
+    const _class = classData[classes[idx]];
+    for (const option of _class.times) {
         let seg = [];
         for (const row of below) {
             let inner = [option].concat(row);
+            // console.log(option);
+            seg.push(inner);
+        }
+        ret = ret.concat(seg);
+    }
+    if (!_class.locked) {
+        let seg = [];
+        for (const row of below) {
+            let inner = [
+                []
+            ].concat(row);
             // console.log(option);
             seg.push(inner);
         }
@@ -205,8 +222,9 @@ function iterate(idx, classes) {
 }
 
 let schedules = generate(classData);
+
+
 for (const s of schedules) {
     console.log('============')
-    s.print();
+    s.printCourses();
 }
-// console.log();
