@@ -10,13 +10,11 @@ async function main(packageIn) {
     try {
         let _package = {
             classList: [
-                ["nyu", "CSUY 4793"],
-                ["nyu", "MAUY 2314"],
-                ["nyu", "DMUY 1133"]
+                ["swarthmore", "CPSC 021"],
+                ["swarthmore", "LING 034"],
+                ["swarthmore", "PHIL 020"]
             ],
-            locked: [
-                "COMPUTER NETWORKING"
-            ],
+            locked: [],
             restrictions: {
                 minCredit: 0,
                 maxCredit: 100,
@@ -83,6 +81,9 @@ async function main(packageIn) {
             return classData;
         }
         let classData = getClassData(data, locked, restrictions);
+        console.log(classData['INTRO TO COMPUTER SCIENCE'].times);
+        console.log(classData['PSYCHOLOGY OF LANGUAGE'].times);
+        console.log(classData['PLATO'].times);
 
         function TimeSlot(name, id, start, end) {
             // name: String
@@ -150,7 +151,6 @@ async function main(packageIn) {
             }
             const below = iterate(idx - 1, classes);
             const _class = classData[classes[idx]];
-            console.log(_class);
             for (const option of _class.times) {
                 let seg = [];
                 for (const row of below) {
@@ -192,7 +192,6 @@ async function main(packageIn) {
             const classes = Object.keys(classData),
                 numClasses = classes.length;
             const choices = iterate(numClasses - 1, classes);
-            console.log(choices);
             for (const choice of choices) {
                 let s = new Schedule(),
                     valid = true;
@@ -218,10 +217,8 @@ async function main(packageIn) {
                     if (!valid) { break; }
                 }
 
-                // if (valid && checkConditions(s, restrictions)) {
-                if (valid) {
+                if (valid && checkConditions(s, restrictions)) {
                     schedules.push(s);
-                    console.log(s.numberOfCourses);
                 }
             }
             return schedules;

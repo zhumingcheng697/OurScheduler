@@ -211,22 +211,6 @@ async function main(packageIn) {
             }
             return schedules;
         }
-        // function TimeSlot(name, id, start, end) {
-        //     // name: String
-        //     // start/end: time converted to int
-        //     // day: int, 0 to 6
-        //     this.name = name;
-        //     this.id = id;
-        //     this.start = start;
-        //     this.end = end;
-        //     this.log = () => {
-        //         console.log(this.name);
-        //         console.log(this.id);
-        //         console.log(this.start);
-        //         console.log(this.end);
-        //     }
-        // }
-
 
         let schedules = generate(classData);
         let _export = [];
