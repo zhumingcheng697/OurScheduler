@@ -36,6 +36,7 @@
                 {{ addedClass.name }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
               </li>
             </ul>
+            <label v-if="classesSet.length">Click &#9734; to lock or unlock each class from your schedule.</label>
           </form>
         </template>
       </Expandable>
