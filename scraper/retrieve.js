@@ -20,9 +20,8 @@ async function dbRetrieve(schoolInfo, classInfo) {
     return await run();
 }
 
-
 module.exports = dbRetrieve;
 
 // (async () => {
-//     console.log(require("util").inspect(await dbRetrieve("nyu", "2214"), false, null));
+//     console.log(require("util").inspect(await dbRetrieve("nyu", "CSUY 2124"), false, null));
 // })();

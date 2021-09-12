@@ -1,4 +1,4 @@
-function dbInsert(schoolInfo, classInfo) {
+async function dbInsert(schoolInfo, classInfo) {
     const { MongoClient } = require("mongodb");
     const url = "mongodb+srv://admin:hackersunion@myscheduler.wcsib.mongodb.net/Myscheduler_classes?retryWrites=true&w=majority";
     const client = new MongoClient(url);
@@ -58,7 +58,7 @@ function dbInsert(schoolInfo, classInfo) {
         }
     }
 
-    run().catch(console.dir);
+    await run();
 }
 
 module.exports = dbInsert;

@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{loading}">
     <div class="top">
       <h1>{{ projectName }}</h1>
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
@@ -106,6 +106,7 @@ export default {
   name: "App",
   data() {
     return {
+      loading: false,
       projectName: "OurScheduler",
       expandedSection: "",
       schoolNameTemp: "",
@@ -193,7 +194,11 @@ export default {
         this.classTemp = "";
         this.classesSet = [];
         this.generatedSchedules = null;
+      } else {
+        return;
       }
+
+      this.loading = true;
 
       try {
         this.schoolId = "";
@@ -210,28 +215,49 @@ export default {
               this.expandedSection = "classes";
             }, 10);
           } else {
-            alert("Unfortunately, your school is not supported at the moment.");
+            alert("Unfortunately, something went wrong.");
           }
+          this.loading = false;
         }).catch((e) => {
           console.error(e);
+          alert("Unfortunately, something went wrong.");
+          this.loading = false;
         });
       } catch (e) {
         console.error(e);
+        alert("Unfortunately, something went wrong.");
+        this.loading = false;
       }
     },
     addClass() {
       this.generatedSchedules = null;
-      this.classesSet.push(Object.assign({ locked: false }, { name: this.classTemp }));
+      this.loading = true;
 
+      const school = this.schoolId.toLowerCase();
+      const target = this.classTemp.toUpperCase();
       try {
-        axios.get("https://www.google.com").then(({ data }) => {
-          // if (data) {
-          this.classesSet.push(Object.assign({ locked: false }, data));
-        }).catch(() => {
-          // console.error(e);
+        axios.get(`http://localhost:4000/retrieve/${school}/${target}`).then(({ data }) => {
+          this.classTemp = "";
+
+          if (data) {
+            const displayName = `${data.name} (${data.label})`;
+            if (!this.classesSet.find((el) => el.name === displayName)) {
+              this.classesSet.push(Object.assign({ locked: false }, { name: displayName, label: data.label }));
+            }
+            this.loading = false;
+          } else {
+            alert("Unfortunately, this class does not exist.");
+            this.loading = false;
+          }
+        }).catch((e) => {
+          console.error(e);
+          alert("Unfortunately, something went wrong.");
+          this.loading = false;
         });
       } catch (e) {
-        // console.error(e);
+        console.error(e);
+        alert("Unfortunately, something went wrong.");
+        this.loading = false;
       }
     },
     setClassCredit() {
@@ -256,6 +282,19 @@ export default {
       this.expandedSection = this.classesSet.length ? "summary" : "classes";
     },
     generateSchedule() {
+      const prop = {
+        classList: this.classesSet.map((el) => ([this.schoolId.toLowerCase(), el.label.toUpperCase()])),
+        locked: this.classesSet.filter((el) => el.locked).map((el) => el.label),
+        restrictions: {
+          minCredit: this.creditAmountSet && this.creditAmountSet[0] || 1,
+          maxCredit: this.creditAmountSet && this.creditAmountSet[1] || 39,
+          minCourses: this.classAmountSet && this.classAmountSet[0] || 1,
+          maxCourses: this.classAmountSet && this.classAmountSet[1] || 9
+        }
+      };
+
+      console.log(prop);
+
       this.generatedSchedules = null;
 
       this.generatedSchedules = [];
@@ -439,5 +478,9 @@ footer {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+#app.loading * {
+  cursor: wait;
 }
 </style>
