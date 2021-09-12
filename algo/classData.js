@@ -1,69 +1,55 @@
 const classData = {
     class_1: {
         name: "calculus",
+        credit: 3,
+        id: "MATH001",
+        locked: true,
         times: [
-            [ // option 1
-                [
-                    ["9:00", "10:00"],
-                    ["13:00", "15:00"]
-                ], // 2 sections on Monday, 9 to 10 and 1 to 3pm
-                [], // no sections on Tuesday for calculus
-                [], // none on Wednesday
-                [
-                    ["15:00", "17:00"]
-                ], // 3 - 5pm on thursday
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [540, 600, 'lab'],
+                [1800, 1860, 'lecture'],
+                [3600, 3660, 'lecture']
             ],
-            [ // option 2
-                [
-                    ["9:00", "10:00"]
-                ],
-                [],
-                [
-                    ["13:00, 15:00"]
-                ],
-                [
-                    ["15:00", "17:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [600, 700, 'lab'],
+                [1500, 1560, 'lecture'],
+                [3000, 3120, 'lecture']
             ]
         ]
     },
     class_2: {
-        name: "History",
+        name: "history",
+        credit: 3,
+        id: "Hist031",
+        locked: true,
         times: [
-            [ // option 1
-                [
-                    ["10:00", "11:00"],
-                    ["13:00, 15:00"]
-                ],
-                [],
-                [],
-                [
-                    ["17:00", "19:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [540, 700, 'lab'],
+                [1400, 1460, 'lecture'],
+                [3600, 3660, 'lecture']
             ],
-            [ // option 2
-                [
-                    ["10:00", "11:00"]
-                ],
-                [],
-                [
-                    ["12:00, 15:00"]
-                ],
-                [
-                    ["18:00", "19:00"]
-                ],
-                [], // none on Friday
-                [], // none on Saturday
-                [] // none on Sunday
+            [
+                [1200, 1300, 'lab'],
+                [1500, 1560, 'lecture'],
+                [3000, 3120, 'lecture']
+            ]
+        ]
+    },
+    class_3: {
+        name: "Data Structures",
+        credit: 3,
+        id: "CS182",
+        locked: false,
+        times: [
+            [
+                ['lab', 1, 2],
+                ['lecture', 10, 11],
+                ['lecture', 12, 23]
+            ],
+            [
+                ['lab', 1, 2],
+                ['lecture', 10, 11],
+                ['lecture', 3000, 3120]
             ]
         ]
     }

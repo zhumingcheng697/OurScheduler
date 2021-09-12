@@ -2,86 +2,62 @@
  * @author Arthur Deng
  * Generate schedule
  */
-const data = {
-    "name": "test1",
-    "credits": 3,
-    "label": "TEST 001",
-    "lectures": [
-        ["-101", [540, 600],
-            [1800, 1860]
-        ],
-        ["-102", [600, 660],
-            [1860, 1920]
-        ]
+
+let conditions = {},
+    classData = {};
+
+function getClassData(
+    _data,
+    _locked = [
+        "name1",
+        "name2"
     ],
-    "extras": [
-        ["-A", [3200, 3260]],
-        ["-B", [3260, 3320]]
-    ]
-}
-const classData = {
-    class_1: {
-        name: "calculus",
-        credit: 3,
-        id: "MATH001",
-        locked: true,
-        times: [
-            [
-                [540, 600, 'lab'],
-                [1800, 1860, 'lecture'],
-                [3600, 3660, 'lecture']
-            ],
-            [
-                [600, 700, 'lab'],
-                [1500, 1560, 'lecture'],
-                [3000, 3120, 'lecture']
+    _restrictions = {
+        minCredit: 0,
+        maxCredit: 25,
+        minCourses: 0,
+        maxCourses: 6
+    }
+) {
+    // locked, min/max credits
+    for (let _class of _data) {
+        let lectures = _class.lectures;
+        let labs = _class.extras;
+        let _name = _class.name;
+        let _credit = _class.credits;
+        let _id = _class.label;
+        classData[_name] = {
+            name: _name,
+            credit: _credit,
+            id: _id,
+            locked: _locked.includes(_name),
+            times: [
+
             ]
-        ]
-    },
-    class_2: {
-        name: "history",
-        credit: 3,
-        id: "Hist031",
-        locked: true,
-        times: [
-            [
-                [540, 700, 'lab'],
-                [1400, 1460, 'lecture'],
-                [3600, 3660, 'lecture']
-            ],
-            [
-                [1200, 1300, 'lab'],
-                [1500, 1560, 'lecture'],
-                [3000, 3120, 'lecture']
-            ]
-        ]
-    },
-    class_3: {
-        name: "Data Structures",
-        credit: 3,
-        id: "CS182",
-        locked: false,
-        times: [
-            [
-                [1, 2, 'lab'],
-                [10, 11, 'lecture'],
-                [12, 23, 'lecture']
-            ],
-            [
-                [1, 2, 'lab'],
-                [2, 3, 'lecture'],
-                [3000, 3120, 'lecture']
-            ]
-        ]
+
+        }
+
+        for (let lecture of lectures) {
+            for (let lab of labs) {
+                let _lec = lecture.slice().splice(1);
+                let _lab = lab.slice().splice(1);
+                let result = [];
+                for (let __lec of _lec) {
+                    result.push(__lec.concat(lecture[0]));
+                }
+                for (let __lab of _lab) {
+                    result.push(__lab.concat(lab[0]));
+                }
+                // console.log(result);
+                classData[_name].times.push(result);
+            }
+        }
     }
 }
 
-let conditions = {
-    minCredit: 0,
-    maxCredit: 25,
-    minCourses: 0,
-    maxCourses: 6
-}
+
+
+
 
 function TimeSlot(name, id, start, end) {
     // name: String
