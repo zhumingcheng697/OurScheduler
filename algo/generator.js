@@ -239,3 +239,5 @@ async function main(packageIn) {
         return _export;
     }
 }
+
+module.exports = main;
