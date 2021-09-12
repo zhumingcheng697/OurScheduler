@@ -20,7 +20,7 @@
       </Expandable>
       <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl}]" @click="toggle(id)">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId}]" @click="schoolId && toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Which classes do you plan to take?</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
@@ -42,7 +42,7 @@
       </Expandable>
       <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl}]" @click="toggle(id)">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId}]" @click="schoolId && toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>How many credits or classes do you plan to take?</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
@@ -59,13 +59,13 @@
       </Expandable>
       <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl || !classesSet.length || (!classAmountSet && !creditAmountSet)}]" @click="toggle(id)">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Summary</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
         </template>
         <template #content>
-          <form @submit.prevent="">
+          <form @submit.prevent="generateSchedule">
             <p class="clickable" @click="expandedSection = 'university'"><strong>{{ schoolNameSet }}</strong></p>
             <p class="clickable" @click="expandedSection = 'amount'">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
@@ -82,13 +82,24 @@
           </form>
         </template>
       </Expandable>
+      <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
+        <template #header="{id, expanded}">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && toggle(id)">
+            <p :style="{ marginRight: '10px'}"><strong>Schedules</strong></p>
+            <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
+          </div>
+        </template>
+        <template #content>
+          <h2 class="centered-text">d3 schedule goes here</h2>
+        </template>
+      </Expandable>
     </div>
     <footer class="centered-text">&COPY; 2021 Hackers Union</footer>
   </div>
 </template>
 
 <script>
-// import axios from "axios";
+import axios from "axios";
 import Expandable from "./components/Expandable.vue";
 
 export default {
@@ -105,7 +116,8 @@ export default {
       creditAmountTemp: "",
       classAmountSet: null,
       creditAmountSet: null,
-      schoolUrl: ""
+      schoolId: "",
+      generatedSchedules: null
     };
   },
   watch: {
@@ -180,49 +192,53 @@ export default {
       if (this.schoolNameSet !== this.schoolNameTemp) {
         this.classTemp = "";
         this.classesSet = [];
+        this.generatedSchedules = null;
       }
 
-      this.schoolNameSet = this.schoolNameTemp;
-      this.schoolUrl = "https://";
+      try {
+        this.schoolId = "";
 
-      setTimeout(() => {
-        this.expandedSection = "classes";
-      }, 10);
+        const target = this.schoolNameTemp;
 
-      // try {
-      //   this.schoolUrl = "";
-      //
-      //   axios.get("https://www.google.com").then(({ data }) => {
-      //     // if (data) {
-      //     this.schoolUrl = data;
-      //     this.schoolNameSet = this.schoolNameTemp;
-      //     this.expand("classes");
-      //     // } else {
-      //     //   alert("Unfortunately, your school is not supported at the moment.");
-      //     // }
-      //   }).catch(() => {
-      //     // console.error(e);
-      //   });
-      // } catch (e) {
-      //   // console.error(e);
-      // }
+        axios.get(`http://localhost:4000/search/${target}`).then(({ data }) => {
+          if (typeof data === "string") {
+            this.schoolId = data;
+            this.schoolNameSet = this.schoolNameTemp;
+            this.expand("classes");
+
+            setTimeout(() => {
+              this.expandedSection = "classes";
+            }, 10);
+          } else {
+            alert("Unfortunately, your school is not supported at the moment.");
+          }
+        }).catch((e) => {
+          console.error(e);
+        });
+      } catch (e) {
+        console.error(e);
+      }
     },
     addClass() {
+      this.generatedSchedules = null;
       this.classesSet.push(Object.assign({ locked: false }, { name: this.classTemp }));
 
-
-      // try {
-      //   axios.get("https://www.google.com").then(({ data }) => {
-      //     // if (data) {
-      //     this.classesSet.push(Object.assign({ locked: false }, data));
-      //   }).catch(() => {
-      //     // console.error(e);
-      //   });
-      // } catch (e) {
-      //   // console.error(e);
-      // }
+      try {
+        axios.get("https://www.google.com").then(({ data }) => {
+          // if (data) {
+          this.classesSet.push(Object.assign({ locked: false }, data));
+        }).catch(() => {
+          // console.error(e);
+        });
+      } catch (e) {
+        // console.error(e);
+      }
     },
     setClassCredit() {
+      if (this.classAmountTemp !== this.classAmountFormatted || this.creditAmountTemp !== this.creditAmountFormatted) {
+        this.generatedSchedules = null;
+      }
+
       if (this.classAmountTemp) {
         const range = this.classAmountTemp.split("-").map(Number);
         this.classAmountSet = range.length === 1 ? [range[0], range[0]] : [Math.min(...range), Math.max(...range)];
@@ -238,6 +254,14 @@ export default {
       }
 
       this.expandedSection = this.classesSet.length ? "summary" : "classes";
+    },
+    generateSchedule() {
+      this.generatedSchedules = null;
+
+      this.generatedSchedules = [];
+      setTimeout(() => {
+        this.expandedSection = "schedules";
+      }, 10);
     }
   }
 };
@@ -248,9 +272,11 @@ export default {
 
 body {
   background: #f0f8fa;
-  margin: 0;
+  /*margin: 0;*/
   padding: 0;
   min-height: 100vh;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 span {
@@ -323,7 +349,7 @@ form > *:first-child {
 }
 
 form > * {
-  margin: 10px;
+  margin: 10px 20px;
 }
 
 form > *:last-child {
