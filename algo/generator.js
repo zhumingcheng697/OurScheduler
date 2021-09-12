@@ -3,7 +3,7 @@
  * Generate schedule
  */
 
-(async() => {
+async function main(packageIn) {
     let data = {},
         locked = [],
         restrictions = {
@@ -13,13 +13,13 @@
             maxCourses: 100
         };
     try {
-        let package = {};
+        let _package = packageIn;
         data = [];
-        for (let _class of package.classList) {
+        for (let _class of _package.classList) {
             data.push(await require("../scraper/retrieve.js")(_class[0], _class[1]));
         }
-        locked = package.locked;
-        restrictions = package.restrictions;
+        locked = _package.locked;
+        restrictions = _package.restrictions;
 
     } finally {
         function getClassData(
@@ -173,7 +173,7 @@
                 let s = new Schedule(),
                     valid = true;
                 for (let classIdx = 0; classIdx < numClasses; classIdx++) {
-                    const ts = choice[classIdx]; // corresponds to the (numClasses - _class - 1)th 
+                    const ts = choice[classIdx]; // corresponds to the (numClasses - _class - 1)th
                     // class in the classData dictionary
                     if (ts.length == 0) {
                         continue;
@@ -235,6 +235,7 @@
                 _export.push(_schedule);
             }
         }
-    }
 
-})();
+        return _export;
+    }
+}
