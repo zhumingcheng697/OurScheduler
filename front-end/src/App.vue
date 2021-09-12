@@ -31,7 +31,8 @@
           <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
           <ul v-if="classesSet.length">
             <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-              <span :style="{ marginRight: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span> {{ addedClass.name }}
+              <span :style="{ marginRight: '5px'}" class="clickable" @click="classesSet[index].locked = !classesSet[index].locked"><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
+              {{ addedClass.name }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
             </li>
           </ul>
         </form>
@@ -45,12 +46,37 @@
         </div>
       </template>
       <template #content>
-        <form @submit.prevent="addClass">
+        <form @submit.prevent="setClassCredit">
           <label for="class-amount">Number of Classes</label>
-          <input class="centered-text" type="text" id="class-amount" v-model="classAmount" placeholder="4">
+          <input class="centered-text" type="text" id="class-amount" v-model="classAmountTemp" placeholder="4">
           <label for="credit-amount">Number of Credits</label>
-          <input class="centered-text" type="text" id="credit-amount" v-model="creditAmount" placeholder="12-18">
+          <input class="centered-text" type="text" id="credit-amount" v-model="creditAmountTemp" placeholder="12-18">
           <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
+        </form>
+      </template>
+    </Expandable>
+    <Expandable :id="'summary'" :expanded="'summary' === expandedSection && !!schoolUrl">
+      <template #header="{id, expanded}">
+        <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl || (!classAmountSet && !creditAmountSet)}]" @click="toggle(id)">
+          <p :style="{ marginRight: '10px'}"><strong>Summary</strong></p>
+          <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
+        </div>
+      </template>
+      <template #content>
+        <form @submit.prevent="">
+          <p><strong>{{ schoolNameSet }}</strong></p>
+          <p>
+            <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
+            <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
+            <span v-if="creditAmountFormatted">{{ creditAmountFormatted }} Credits</span>
+          </p>
+          <ul v-if="classesSet.length">
+            <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
+              <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
+              {{ addedClass.name }}
+            </li>
+          </ul>
+          <input class="centered-text" type="submit" value="Generate Schedule">
         </form>
       </template>
     </Expandable>
@@ -58,7 +84,7 @@
 </template>
 
 <script>
-import axios from "axios";
+// import axios from "axios";
 import Expandable from "./components/Expandable.vue";
 
 export default {
@@ -70,11 +96,39 @@ export default {
       schoolNameTemp: "",
       schoolNameSet: "",
       classTemp: "",
-      classesSet: [{ priority: true, name: "Hand Washing 202" }, { priority: true, name: "Hand Washing 203" }],
-      classAmount: "",
-      creditAmount: "",
-      schoolUrl: "http"
+      classesSet: [{ locked: true, name: "Hand Washing 202" }, { locked: true, name: "Hand Washing 203" }],
+      classAmountTemp: "",
+      creditAmountTemp: "",
+      classAmountSet: null,
+      creditAmountSet: null,
+      schoolUrl: ""
     };
+  },
+  watch: {
+    expandedSection(toBeExpanded) {
+      switch (toBeExpanded) {
+        case "university":
+          if (this.schoolNameSet) {
+            this.schoolNameTemp = this.schoolNameSet;
+          }
+          break;
+        case "classes":
+          this.classTemp = "";
+          break;
+        case "amount":
+          if (this.classAmountSet && this.creditAmountSet) {
+            this.classAmountTemp = this.classAmountFormatted;
+            this.creditAmountTemp = this.creditAmountFormatted;
+          } else if (this.classAmountSet) {
+            this.classAmountTemp = this.classAmountFormatted;
+            this.creditAmountTemp = "";
+          } else if (this.creditAmountSet) {
+            this.creditAmountTemp = this.creditAmountFormatted;
+            this.classAmountTemp = "";
+          }
+          break;
+      }
+    }
   },
   mounted() {
     this.expandedSection = "university";
@@ -84,13 +138,25 @@ export default {
       return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp);
     },
     isClassAmountValid() {
-      return /^[1-9](?:-[1-9])?$/.test(this.classAmount);
+      return /^[1-9](?:-[1-9])?$/.test(this.classAmountTemp);
     },
     isCreditAmountValid() {
-      return /^[1-9][0-9]*(?:-[1-9][0-9]*)?$/.test(this.creditAmount);
+      return /^(?:[1-3][0-9]|[1-9])(?:-(?:[1-3][0-9]|[1-9]))?$/.test(this.creditAmountTemp);
     },
     isClassCreditValid() {
-      return (this.classAmount || this.creditAmount) && (!this.classAmount || this.isClassAmountValid) && (!this.creditAmount || this.isCreditAmountValid);
+      return (this.classAmountTemp || this.creditAmountTemp) && (!this.classAmountTemp || this.isClassAmountValid) && (!this.creditAmountTemp || this.isCreditAmountValid);
+    },
+    classAmountFormatted() {
+      if (this.classAmountSet) {
+        return this.classAmountSet[0] === this.classAmountSet[1] ? `${this.classAmountSet[0]}` : this.classAmountSet.join("-");
+      }
+      return "";
+    },
+    creditAmountFormatted() {
+      if (this.creditAmountSet) {
+        return this.creditAmountSet[0] === this.creditAmountSet[1] ? `${this.creditAmountSet[0]}` : this.creditAmountSet.join("-");
+      }
+      return "";
     }
   },
   components: {
@@ -107,38 +173,58 @@ export default {
       this.expandedSection = (this.expandedSection === id) ? "" : id;
     },
     setSchoolUrl() {
-      try {
-        this.schoolUrl = "";
-
-        axios.get("https://www.google.com").then(({ data }) => {
-          // if (data) {
-          this.schoolUrl = data;
-          this.schoolNameSet = this.schoolNameTemp;
-          this.expand("classes");
-          // } else {
-          //   alert("Unfortunately, your school is not supported at the moment.");
-          // }
-        }).catch(() => {
-          // console.error(e);
-        });
-      } catch (e) {
-        // console.error(e);
-      }
-    },
-    addClass() {
-      this.classesSet.push(Object.assign({ priority: false }, { name: this.classTemp }));
-
-
+      this.schoolNameSet = this.schoolNameTemp;
+      this.schoolUrl = "https://";
+      this.expandedSection = "classes";
       // try {
+      //   this.schoolUrl = "";
+      //
       //   axios.get("https://www.google.com").then(({ data }) => {
       //     // if (data) {
-      //     this.classesSet.push(Object.assign({ priority: false }, data));
+      //     this.schoolUrl = data;
+      //     this.schoolNameSet = this.schoolNameTemp;
+      //     this.expand("classes");
+      //     // } else {
+      //     //   alert("Unfortunately, your school is not supported at the moment.");
+      //     // }
       //   }).catch(() => {
       //     // console.error(e);
       //   });
       // } catch (e) {
       //   // console.error(e);
       // }
+    },
+    addClass() {
+      this.classesSet.push(Object.assign({ locked: false }, { name: this.classTemp }));
+
+
+      // try {
+      //   axios.get("https://www.google.com").then(({ data }) => {
+      //     // if (data) {
+      //     this.classesSet.push(Object.assign({ locked: false }, data));
+      //   }).catch(() => {
+      //     // console.error(e);
+      //   });
+      // } catch (e) {
+      //   // console.error(e);
+      // }
+    },
+    setClassCredit() {
+      if (this.classAmountTemp) {
+        const range = this.classAmountTemp.split("-").map(Number);
+        this.classAmountSet = range.length === 1 ? [range[0], range[0]] : [Math.min(...range), Math.max(...range)];
+      } else {
+        this.classAmountSet = null;
+      }
+
+      if (this.creditAmountTemp) {
+        const range = this.creditAmountTemp.split("-").map(Number);
+        this.creditAmountSet = range.length === 1 ? [range[0], range[0]] : [Math.min(...range), Math.max(...range)];
+      } else {
+        this.creditAmountSet = null;
+      }
+
+      this.expandedSection = "summary";
     }
   }
 };
@@ -180,13 +266,13 @@ strong {
 
 .expandable-header__button {
   padding: 0 20px;
-  user-select: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .clickable {
+  user-select: none;
   cursor: pointer;
   transition: background-color 0.5s;
 }
@@ -232,6 +318,15 @@ form > *:last-child {
 
 form > label {
   margin-bottom: 0;
+}
+
+form > p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+label {
+  font-size: 1em;
 }
 
 input {
@@ -280,9 +375,9 @@ li {
   list-style: none;
   font-size: 1em;
   margin: 8px;
-  padding: 8px;
+  padding: 5px 10px;
   background: #e9f1f2;
-  border-radius: 5px;
+  border-radius: 8px;
   justify-content: center;
   align-items: center
 }
