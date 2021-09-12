@@ -66,7 +66,7 @@
         </template>
         <template #content>
           <form @submit.prevent="generateSchedule">
-            <p class="clickable" @click="expandedSection = 'university'"><strong>{{ schoolNameSet }}</strong></p>
+            <p class="clickable" @click="expandedSection = 'university'"><strong>{{ schoolNameSet.toUpperCase() }}</strong></p>
             <p class="clickable" @click="expandedSection = 'amount'">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
               <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
@@ -282,6 +282,8 @@ export default {
       this.expandedSection = this.classesSet.length ? "summary" : "classes";
     },
     generateSchedule() {
+      this.loading = true;
+
       const prop = {
         classList: this.classesSet.map((el) => ([this.schoolId.toLowerCase(), el.label.toUpperCase()])),
         locked: this.classesSet.filter((el) => el.locked).map((el) => el.label),
@@ -293,14 +295,27 @@ export default {
         }
       };
 
-      console.log(prop);
-
       this.generatedSchedules = null;
+      // this.generatedSchedules = [];
 
-      this.generatedSchedules = [];
-      setTimeout(() => {
-        this.expandedSection = "schedules";
-      }, 10);
+      try {
+        axios.get(`http://localhost:4000/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
+          console.log(data)
+          this.loading = false;
+
+          setTimeout(() => {
+            this.expandedSection = "schedules";
+          }, 10);
+        }).catch((e) => {
+          console.error(e);
+          alert("Unfortunately, something went wrong.");
+          this.loading = false;
+        });
+      } catch (e) {
+        console.error(e);
+        alert("Unfortunately, something went wrong.");
+        this.loading = false;
+      }
     }
   }
 };

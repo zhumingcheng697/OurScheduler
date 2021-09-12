@@ -22,7 +22,7 @@ async function getClassInfo(schoolCode, target, dev) {
         );
 
         const needSolving = await page.evaluate(() => {
-            !!document.querySelector("iframe[src*=\"api2/anchor\"]");
+            return !!document.querySelector("iframe[src*=\"api2/anchor\"]");
         });
 
         if (needSolving) {
