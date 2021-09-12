@@ -91,7 +91,7 @@ export default {
   name: "App",
   data() {
     return {
-      projectName: "MyScheduler",
+      projectName: "OurScheduler",
       expandedSection: "",
       schoolNameTemp: "",
       schoolNameSet: "",
