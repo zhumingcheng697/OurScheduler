@@ -225,7 +225,7 @@ async function main(packageIn) {
                 let _schedule = [];
                 let slots = s.timeslots;
                 for (const _slot of slots) {
-                    _schedule.push([_slot.name, _slot.id, _slot.start, _slot.end]);
+                    _schedule.push([_slot.name, [_slot.start, _slot.end]]);
                 }
                 _export.push(_schedule);
             }
