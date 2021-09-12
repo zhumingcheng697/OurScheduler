@@ -27,8 +27,11 @@
         </template>
         <template #content>
           <form @submit.prevent="addClass">
-            <label for="class-name">Class Code</label>
-            <input class="centered-text" id="class-name" type="text" v-model="classTemp" placeholder="CS 101">
+            <label for="class-code">Class Code</label>
+            <input class="centered-text" id="class-code" type="text" v-model="classTemp" placeholder="CS 101">
+            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
+            <label for="class-name">Class Name</label>
+            <input class="centered-text" id="class-name" type="text" v-model="classTemp" placeholder="Intro to Computer Science">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
