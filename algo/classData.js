@@ -1,56 +1,23 @@
-const classData = {
-    class_1: {
-        name: "calculus",
-        credit: 3,
-        id: "MATH001",
-        locked: true,
-        times: [
-            [
-                [540, 600, 'lab'],
-                [1800, 1860, 'lecture'],
-                [3600, 3660, 'lecture']
-            ],
-            [
-                [600, 700, 'lab'],
-                [1500, 1560, 'lecture'],
-                [3000, 3120, 'lecture']
-            ]
-        ]
-    },
-    class_2: {
-        name: "history",
-        credit: 3,
-        id: "Hist031",
-        locked: true,
-        times: [
-            [
-                [540, 700, 'lab'],
-                [1400, 1460, 'lecture'],
-                [3600, 3660, 'lecture']
-            ],
-            [
-                [1200, 1300, 'lab'],
-                [1500, 1560, 'lecture'],
-                [3000, 3120, 'lecture']
-            ]
-        ]
-    },
-    class_3: {
-        name: "Data Structures",
-        credit: 3,
-        id: "CS182",
-        locked: false,
-        times: [
-            [
-                ['lab', 1, 2],
-                ['lecture', 10, 11],
-                ['lecture', 12, 23]
-            ],
-            [
-                ['lab', 1, 2],
-                ['lecture', 10, 11],
-                ['lecture', 3000, 3120]
-            ]
-        ]
-    }
+let Excel = require('exceljs');
+let workbook = new Excel.Workbook();
+const path = "test.csv";
+workbook.xlsx.readFile(path)
+    .then(() => {
+
+    });
+
+let convertTime = (intTime) => {
+    const day = Math.floor(intTime / (24 * 60));
+    intTime = intTime - 24 * 60 * day;
+    const hour = Math.floor(intTime / 60);
+    const minute = intTime - 60 * hour;
+    return [day, hour, minute];
 }
+const sheet = workbook.addWorksheet('My Sheet');
+// sheet.getCell('A1').value = convertTime(1900);
+console.log(convertTime(1900));
+
+workbook.xlsx.writeFile(path)
+    .then(function() {
+        // done 
+    });

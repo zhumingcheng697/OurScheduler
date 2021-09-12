@@ -13,13 +13,14 @@
             maxCourses: 100
         };
     try {
-        data = []
-        data.push(await require("../scraper/retrieve.js")("nyu", "CSUY 2214"));
-        data.push(await require("../scraper/retrieve.js")("nyu", "MAUY 2314"));
-        data.push(await require("../scraper/retrieve.js")("nyu", "DMUY 1133"));
-        data.push(await require("../scraper/retrieve.js")("nyu", "CSUY 2124"));
-        console.log(data[2]);
-        console.log(data[3]);
+        let package = {};
+        data = [];
+        for (let _class of package.classList) {
+            data.push(await require("../scraper/retrieve.js")(_class[0], _class[1]));
+        }
+        locked = package.locked;
+        restrictions = package.restrictions;
+
     } finally {
         function getClassData(
             _data,
@@ -199,11 +200,40 @@
             }
             return schedules;
         }
+        // function TimeSlot(name, id, start, end) {
+        //     // name: String
+        //     // start/end: time converted to int
+        //     // day: int, 0 to 6
+        //     this.name = name;
+        //     this.id = id;
+        //     this.start = start;
+        //     this.end = end;
+        //     this.log = () => {
+        //         console.log(this.name);
+        //         console.log(this.id);
+        //         console.log(this.start);
+        //         console.log(this.end);
+        //     }
+        // }
+
 
         let schedules = generate(classData);
-        for (const s of schedules) {
-            console.log('============')
-            s.printCourses();
+        let _export = [];
+        if (schedules.length == 0) {
+            console.log("No schedule can be generated for the given courses (conflict exists for all options).");
+        } else {
+
+            for (const s of schedules) {
+                console.log('===============');
+                s.printCourses();
+                console.log('===============');
+                let _schedule = [];
+                let slots = s.timeslots;
+                for (const _slot of slots) {
+                    _schedule.push([_slot.name, _slot.id, _slot.start, _slot.end]);
+                }
+                _export.push(_schedule);
+            }
         }
     }
 
