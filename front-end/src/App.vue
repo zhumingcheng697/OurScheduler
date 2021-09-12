@@ -27,11 +27,8 @@
         </template>
         <template #content>
           <form @submit.prevent="addClass">
-            <label for="class-code">Class Code</label>
-            <input class="centered-text" id="class-code" type="text" v-model="classTemp" placeholder="CS 101">
-            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
-            <label for="class-name">Class Name</label>
-            <input class="centered-text" id="class-name" type="text" v-model="classTemp" placeholder="Intro to Computer Science">
+            <label for="class-code">Class Name or Class Code</label>
+            <input class="centered-text" id="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
@@ -52,7 +49,7 @@
         <template #content>
           <form @submit.prevent="setClassCredit">
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" type="text" id="class-amount" v-model="classAmountTemp" placeholder="4">
+            <input class="centered-text" type="text" id="class-amount" v-model="classAmountTemp" placeholder="4-5">
             <label for="credit-amount">Number of Credits</label>
             <input class="centered-text" type="text" id="credit-amount" v-model="creditAmountTemp" placeholder="12-18">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
@@ -239,7 +236,7 @@ export default {
         this.creditAmountSet = null;
       }
 
-      this.expandedSection = "summary";
+      this.expandedSection = this.classesSet.length ? "summary" : "classes";
     }
   }
 };
