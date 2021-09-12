@@ -42,19 +42,30 @@ async function main(packageIn) {
                     locked: _locked.includes(_name),
                     times: []
                 }
-                for (let lecture of lectures) {
-                    for (let lab of labs) {
+                if (labs.length == 0) {
+                    for (let lecture of lectures) {
                         let _lec = lecture.slice().splice(1);
-                        let _lab = lab.slice().splice(1);
                         let result = [];
                         for (let __lec of _lec) {
                             result.push(__lec.concat(lecture[0]));
                         }
-                        for (let __lab of _lab) {
-                            result.push(__lab.concat(lab[0]));
-                        }
-                        // console.log(result);
                         classData[_name].times.push(result);
+                    }
+                } else {
+                    for (let lecture of lectures) {
+                        for (let lab of labs) {
+                            let _lec = lecture.slice().splice(1);
+                            let _lab = lab.slice().splice(1);
+                            let result = [];
+                            for (let __lec of _lec) {
+                                result.push(__lec.concat(lecture[0]));
+                            }
+                            for (let __lab of _lab) {
+                                result.push(__lab.concat(lab[0]));
+                            }
+                            // console.log(result);
+                            classData[_name].times.push(result);
+                        }
                     }
                 }
             }
