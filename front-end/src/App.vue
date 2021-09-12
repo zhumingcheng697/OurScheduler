@@ -46,11 +46,11 @@
       </template>
       <template #content>
         <form @submit.prevent="addClass">
-              <label for="class-amount">Number of Classes</label>
-              <input class="centered-text" type="text" id="class-amount" v-model="classAmount" placeholder="4">
-              <label for="credit-amount">Number of Credits</label>
-              <input class="centered-text" type="text" id="credit-amount" v-model="creditAmount" placeholder="12-18">
-          <input class="centered-text" type="submit" value="Confirm" :disabled="!classAmount && !creditAmount">
+          <label for="class-amount">Number of Classes</label>
+          <input class="centered-text" type="text" id="class-amount" v-model="classAmount" placeholder="4">
+          <label for="credit-amount">Number of Credits</label>
+          <input class="centered-text" type="text" id="credit-amount" v-model="creditAmount" placeholder="12-18">
+          <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
         </form>
       </template>
     </Expandable>
@@ -82,6 +82,15 @@ export default {
   computed: {
     allowAddClass() {
       return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp);
+    },
+    isClassAmountValid() {
+      return /^[1-9](?:-[1-9])?$/.test(this.classAmount);
+    },
+    isCreditAmountValid() {
+      return /^[1-9][0-9]*(?:-[1-9][0-9]*)?$/.test(this.creditAmount);
+    },
+    isClassCreditValid() {
+      return (this.classAmount || this.creditAmount) && (!this.classAmount || this.isClassAmountValid) && (!this.creditAmount || this.isCreditAmountValid);
     }
   },
   components: {
@@ -270,7 +279,10 @@ li {
   display: inline-flex;
   list-style: none;
   font-size: 1em;
-  margin: 10px;
+  margin: 8px;
+  padding: 8px;
+  background: #e9f1f2;
+  border-radius: 5px;
   justify-content: center;
   align-items: center
 }
