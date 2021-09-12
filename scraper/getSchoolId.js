@@ -22,7 +22,7 @@ async function getSchoolId(target, dev) {
         );
 
         const needSolving = await page.evaluate(() => {
-            !!document.querySelector("iframe[src*=\"api2/anchor\"]");
+            return !!document.querySelector("iframe[src*=\"api2/anchor\"]");
         });
 
         if (needSolving) {
@@ -33,7 +33,6 @@ async function getSchoolId(target, dev) {
             const anchors = document.querySelectorAll(`#search div a`);
 
             for (let index = 0; index < anchors.length; ++index) {
-                console.log(anchors[index].href)
                 const match = anchors[index].href.match(/\/\/www.coursicle.com\/([^\/]+)\//);
                 if (match && match[1]) {
                     return match[1];

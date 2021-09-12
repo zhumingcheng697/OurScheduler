@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 4000;
 
+const generatorRoute = require("./routes/generatorRoute");
 const retrieveRoute = require("./routes/retrieveRoute");
 const searchRoute = require("./routes/searchRoute");
 
@@ -14,6 +15,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use("/generate", generatorRoute);
 app.use("/retrieve", retrieveRoute);
 app.use("/search", searchRoute);
 
