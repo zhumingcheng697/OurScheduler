@@ -67,7 +67,7 @@
         <template #content>
           <form @submit.prevent="generateSchedule">
             <p class="clickable" @click="expandedSection = 'university'">
-              <strong>{{ schoolNameSet.toUpperCase() }}</strong></p>
+              <strong>{{ schoolId.toUpperCase() }}</strong></p>
             <p class="clickable" @click="expandedSection = 'amount'">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
               <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
@@ -112,7 +112,6 @@ export default {
       projectName: "OurScheduler",
       expandedSection: "",
       schoolNameTemp: "",
-      schoolNameSet: "",
       classTemp: "",
       classesSet: [],
       classAmountTemp: "",
@@ -127,8 +126,8 @@ export default {
     expandedSection(toBeExpanded) {
       switch (toBeExpanded) {
         case "university":
-          if (this.schoolNameSet) {
-            this.schoolNameTemp = this.schoolNameSet;
+          if (this.schoolId) {
+            this.schoolNameTemp = this.schoolId;
           }
           break;
         case "classes":
@@ -192,7 +191,7 @@ export default {
       this.expandedSection = (this.expandedSection === id) ? "" : id;
     },
     setSchoolUrl() {
-      if (this.schoolNameSet !== this.schoolNameTemp) {
+      if (this.schoolId !== this.schoolNameTemp) {
         this.classTemp = "";
         this.classesSet = [];
         this.generatedSchedules = null;
@@ -210,7 +209,6 @@ export default {
         axios.get(`https://ourscheduler.herokuapp.com/search/${target}`).then(({ data }) => {
           if (typeof data === "string") {
             this.schoolId = data;
-            this.schoolNameSet = this.schoolNameTemp;
             this.expand("classes");
 
             setTimeout(() => {
