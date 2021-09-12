@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <div class="top">
     <h1>{{ projectName }}</h1>
     <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
     <Expandable :id="'university'" :expanded="'university' === expandedSection">
@@ -80,6 +81,8 @@
         </form>
       </template>
     </Expandable>
+    </div>
+    <footer class="centered-text">&COPY; 2021 Hackers Union</footer>
   </div>
 </template>
 
@@ -96,7 +99,7 @@ export default {
       schoolNameTemp: "",
       schoolNameSet: "",
       classTemp: "",
-      classesSet: [{ locked: true, name: "Hand Washing 202" }, { locked: true, name: "Hand Washing 203" }],
+      classesSet: [{ locked: true, name: "Hand Washing 202" }, { locked: false, name: "Hand Washing 203" }],
       classAmountTemp: "",
       creditAmountTemp: "",
       classAmountSet: null,
@@ -237,6 +240,7 @@ body {
   background: #f0f8fa;
   margin: 0;
   padding: 0;
+  min-height: 100vh;
 }
 
 span {
@@ -290,7 +294,7 @@ strong {
 }
 
 .expandable .clickable.disabled {
-  opacity: 50%;
+  opacity: 0.5;
 }
 
 .clickable.disabled {
@@ -334,6 +338,8 @@ input {
 }
 
 input[type=text] {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
   box-sizing: border-box;
   width: min(800px, calc(100% - 40px));
   outline: none;
@@ -344,6 +350,8 @@ input[type=text] {
 }
 
 input[type=submit] {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
   color: #0e3945;
   background: #daecf0;
   cursor: pointer;
@@ -360,7 +368,7 @@ input[type=submit]:not(:disabled):hover {
 }
 
 input[type=submit]:disabled {
-  opacity: 50%;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -382,10 +390,18 @@ li {
   align-items: center
 }
 
+footer {
+  margin: 20px;
+}
+
 #app {
   font-family: 'Open Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
   color: #0e3945;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 </style>
