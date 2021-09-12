@@ -40,13 +40,13 @@ export default {
 
         this.$el.classList.add("animating");
 
-        setImmediate(() => {
+        setTimeout(() => {
           if (toBeExpanded) {
             this.$el.classList.add("expanded");
           } else {
             this.$el.classList.remove("expanded");
           }
-        });
+        }, 10);
       }
     }
   }

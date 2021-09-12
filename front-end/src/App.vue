@@ -18,7 +18,7 @@
           </form>
         </template>
       </Expandable>
-      <Expandable :id="'classes'" :expanded="'classes' === expandedSection && !!schoolUrl">
+      <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
           <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl}]" @click="toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Which classes do you plan to take?</strong></p>
@@ -39,7 +39,7 @@
           </form>
         </template>
       </Expandable>
-      <Expandable :id="'amount'" :expanded="'amount' === expandedSection && !!schoolUrl">
+      <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
           <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl}]" @click="toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>How many credits or classes do you plan to take?</strong></p>
@@ -56,7 +56,7 @@
           </form>
         </template>
       </Expandable>
-      <Expandable :id="'summary'" :expanded="'summary' === expandedSection && !!schoolUrl && !!classesSet.length && !!(classAmountSet || creditAmountSet)">
+      <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
           <div :class="['expandable-header__button', 'clickable', {disabled: !schoolUrl || !classesSet.length || (!classAmountSet && !creditAmountSet)}]" @click="toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Summary</strong></p>
@@ -186,7 +186,7 @@ export default {
 
       setTimeout(() => {
         this.expandedSection = "classes";
-      }, 0);
+      }, 10);
 
       // try {
       //   this.schoolUrl = "";
