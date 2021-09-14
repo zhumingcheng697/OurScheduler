@@ -358,7 +358,7 @@ export default {
       ];
       const margin = { top: 30, right: 30, bottom: 30, left: 50 }; // Gives space for axes and other margins
       const height = 1500;
-      const width = 1050;
+      const width = 960;
       const barWidth = 900;
       const barHeight = 1475;
       // const nowColor = "#EA4335";
@@ -589,5 +589,9 @@ footer {
 
 #app.loading * {
   cursor: wait;
+}
+
+#d3-schedule {
+  overflow: auto;
 }
 </style>
