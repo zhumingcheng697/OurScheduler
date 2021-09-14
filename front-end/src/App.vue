@@ -5,7 +5,7 @@
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
       <Expandable :id="'university'" :expanded="'university' === expandedSection">
         <template #header="{id, expanded}">
-          <div tabindex="0" class="expandable-header__button clickable" @click="toggle(id)">
+          <div class="expandable-header__button clickable" @click="toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Which university or college do you attend?</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
