@@ -66,14 +66,14 @@
         </template>
         <template #content>
           <form @submit.prevent="generateSchedule">
-            <p class="clickable" @click="expandedSection = 'university'">
+            <p class="clickable" @click="expand('university')">
               <strong>{{ schoolId }}</strong></p>
-            <p class="clickable" @click="expandedSection = 'amount'">
+            <p class="clickable" @click="expand('amount')">
               <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
               <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
               <span v-if="creditAmountFormatted">{{ creditAmountFormatted }} Credits</span>
             </p>
-            <ul v-if="classesSet.length" class="clickable" @click="expandedSection = 'classes'">
+            <ul v-if="classesSet.length" class="clickable" @click="expand('classes')">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
                 <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.name }}
@@ -152,7 +152,7 @@ export default {
     }
   },
   mounted() {
-    this.expandedSection = "university";
+    this.expand("university");
   },
   computed: {
     allowAddClass() {
@@ -185,13 +185,19 @@ export default {
   },
   methods: {
     expand(id) {
-      this.expandedSection = id;
+      setTimeout(() => {
+        this.expandedSection = id;
+      }, 1);
     },
     collapse() {
-      this.expandedSection = "";
+      setTimeout(() => {
+        this.expandedSection = "";
+      }, 1);
     },
     toggle(id) {
-      this.expandedSection = (this.expandedSection === id) ? "" : id;
+      setTimeout(() => {
+        this.expandedSection = (this.expandedSection === id) ? "" : id;
+      }, 1);
     },
     setSchoolUrl() {
       if (this.schoolId !== this.schoolNameTemp) {
@@ -199,9 +205,7 @@ export default {
         this.classesSet = [];
         this.generatedSchedules = null;
       } else {
-        setTimeout(() => {
-          this.expandedSection = "classes";
-        }, 10);
+        this.expand("classes");
         return;
       }
 
@@ -217,9 +221,7 @@ export default {
             this.schoolId = data.toUpperCase();
             this.expand("classes");
 
-            setTimeout(() => {
-              this.expandedSection = "classes";
-            }, 10);
+            this.expand("classes");
           } else {
             alert("Unfortunately, something went wrong.");
           }
@@ -285,7 +287,7 @@ export default {
         this.creditAmountSet = null;
       }
 
-      this.expandedSection = this.classesSet.length ? "summary" : "classes";
+      this.expand(this.classesSet.length ? "summary" : "classes");
     },
     generateSchedule() {
       this.loading = true;
@@ -308,9 +310,7 @@ export default {
           this.runD3(data[0]);
           this.generatedSchedules = data;
           this.loading = false;
-          setTimeout(() => {
-            this.expandedSection = "schedules";
-          }, 10);
+          this.expand("schedules");
         }).catch((e) => {
           console.error(e);
           alert("Unfortunately, something went wrong.");
@@ -356,7 +356,7 @@ export default {
         ...calendarEvents.map(d => new Date(d.timeFrom)),
         ...calendarEvents.map(d => new Date(d.timeTo))
       ];
-      const margin = { top: 30, right: 30, bottom: 30, left: 50 }; // Gives space for axes and other margins
+      const margin = { top: 45, right: 30, bottom: 30, left: 50 }; // Gives space for axes and other margins
       const height = 1500;
       const width = 960;
       const barWidth = 900;
@@ -383,12 +383,12 @@ export default {
 
       const gridLines = d3.axisRight().ticks(24).tickSize(barStyle.width) // even though they're "ticks" we've set them to be full-width
           .tickFormat("").scale(yScale);
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 85).attr("y", 15).text("Monday");
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 235).attr("y", 15).text("Tuesday");
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 370).attr("y", 15).text("Wednesday");
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 530).attr("y", 15).text("Thursday");
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 695).attr("y", 15).text("Friday");
-      svg.append("text").attr("font-family", "Helvetica").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 835).attr("y", 15).text("Saturday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 85).attr("y", 32).text("Monday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 235).attr("y", 32).text("Tuesday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 370).attr("y", 32).text("Wednesday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 530).attr("y", 32).text("Thursday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 695).attr("y", 32).text("Friday");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 835).attr("y", 32).text("Saturday");
       svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.3).call(gridLines);
       const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
       barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("x", d => margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + barStyle.startPadding).attr("height", d => {
@@ -398,12 +398,12 @@ export default {
             endPoint - startPoint - barStyle.endPadding - barStyle.startPadding
         );
       }).attr("width", barWidth / 6).attr("rx", barStyle.radius);
-      barGroups.append("text").attr("font-family", "Helvetica").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.textColor).attr("x", d => 10 + margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
+      barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.textColor).attr("x", d => 10 + margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
 // Actually add the element to the page
       const element = this.$refs["d3-schedule"];
       while (element.firstChild) {
-        element.removeChild(element.firstChild)
+        element.removeChild(element.firstChild);
       }
       element.append(svg.node());
       // document.body.append(svg.node());
@@ -506,6 +506,10 @@ form > label {
   margin-bottom: 0;
 }
 
+form > label:last-child {
+  font-weight: 300;
+}
+
 form > p {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -542,6 +546,7 @@ input[type=submit] {
   border-radius: 10px;
   padding: 12px 25px;
   font-size: 0.9em;
+  font-weight: 600;
   transition: background-color 0.5s;
 }
 
