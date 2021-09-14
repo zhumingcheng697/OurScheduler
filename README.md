@@ -36,6 +36,6 @@ We learned how to work under stress, collaborate as a team, and adapt to challen
 
 We envisioned quite a few future updates for OurScheduler: having it be able to suggest alternatives if a certain schedule cannot be fulfilled or fill in a schedule under the course/credit limit with courses that were not prompted by the user, both using machine learning algorithms; having it be able to take in user manual input, to update our database to gradually correct our mistakes and fill in missing information, and also to let user put in "breaks" at the same priority level as locked-in courses to further optimize schedule generation; having it be able to do more and more, everything that a fellow college student would have hoped for in his scheduler.
 
-## Built 
+## Built With
 
 HTML, CSS, JavaScript, d3.js, Vue.js, Node.js, express.js, axios, Puppeteer, MongoDB, netlify, heroku

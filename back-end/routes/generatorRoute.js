@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const generator = require("../generator");
+const generator = require("../generatorV2");
 
 router.get("/", (req, res) => {
     const prop = JSON.parse(decodeURI(req.query.prop));
