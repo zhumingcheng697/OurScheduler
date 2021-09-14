@@ -159,7 +159,7 @@ export default {
       return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp);
     },
     isClassAmountValid() {
-      return /^[1-9](?:-[1-9])?$/.test(this.classAmountTemp);
+      return /^(?:1[0-9]|[1-9])(?:-(?:1[0-9]|[1-9]))?$/.test(this.classAmountTemp);
     },
     isCreditAmountValid() {
       return /^(?:[1-3][0-9]|[1-9])(?:-(?:[1-3][0-9]|[1-9]))?$/.test(this.creditAmountTemp);
@@ -248,7 +248,7 @@ export default {
 
             const displayName = `${data.name} (${data.label})`;
             if (!this.classesSet.find((el) => el.name === displayName)) {
-              this.classesSet.push(Object.assign({ locked: false }, { name: displayName, label: data.label }));
+              this.classesSet.push({ locked: false, name: displayName, label: data.label });
             }
             this.loading = false;
           } else {
@@ -297,7 +297,7 @@ export default {
           minCredit: this.creditAmountSet && this.creditAmountSet[0] || 1,
           maxCredit: this.creditAmountSet && this.creditAmountSet[1] || 39,
           minCourses: this.classAmountSet && this.classAmountSet[0] || 1,
-          maxCourses: this.classAmountSet && this.classAmountSet[1] || 9
+          maxCourses: this.classAmountSet && this.classAmountSet[1] || 19
         }
       };
 

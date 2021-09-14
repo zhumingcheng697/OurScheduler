@@ -71,22 +71,7 @@ async function main(packageIn) {
         this.credits = 0;
         this.numberOfCourses = 0;
         this.add = (ts) => {
-            if (this.checkConflict(ts)) {
-                return false;
-            }
             this.timeslots.push(ts);
-            return true;
-            // if successfully added return true
-            // return false if conflict exists
-        };
-        this.checkConflict = (ts) => {
-            for (const t of this.timeslots) {
-                if ((t.start < ts.end) && (ts.start < t.end)) {
-                    // check for conflict
-                    return true;
-                }
-            }
-            return false;
         };
     }
 
@@ -106,8 +91,29 @@ async function main(packageIn) {
             let seg = [];
             for (const [row, currCourse, currCredit] of below) {
                 if ((currCourse + 1 <= maxCourse) && (currCredit + credit <= maxCredit)) {
-                    let inner = [option].concat(row);
-                    seg.push([inner, currCourse + 1, currCredit + credit]);
+                    let inner = [option];
+                    let hasConflict = false;
+
+                    for (const _class of row) {
+                        for (const [startT, endT] of _class) {
+                            for (const [_start, _end] of option) {
+                                if ((_start < endT) && (startT < _end)) {
+                                    hasConflict = true;
+                                    break;
+                                }
+                            }
+                            if (hasConflict) {break;}
+                        }
+                        if (hasConflict) {
+                            break;
+                        } else {
+                            inner.push(_class);
+                        }
+                    }
+
+                    if (!hasConflict) {
+                        seg.push([inner, currCourse + 1, currCredit + credit]);
+                    }
                 }
             }
             for (const s of seg) {
@@ -144,8 +150,7 @@ async function main(packageIn) {
             numClasses = classes.length;
         const choices = iterate(numClasses - 1, classes);
         for (const [choice] of choices) {
-            let s = new Schedule(),
-                valid = true;
+            let s = new Schedule();
             for (let classIdx = 0; classIdx < numClasses; classIdx++) {
                 const ts = choice[classIdx]; // corresponds to the (numClasses - _class - 1)th
                 // class in the classData dictionary
@@ -162,15 +167,13 @@ async function main(packageIn) {
                         time[0],
                         time[1]
                     );
-                    valid = s.add(slot);
-                    if (!valid) { break; }
+                    s.add(slot);
                 }
                 s.credits += _class.credit;
                 s.numberOfCourses += 1;
-                if (!valid) { break; }
             }
 
-            if (valid && checkConditions(s, restrictions)) {
+            if (checkConditions(s, restrictions)) {
                 schedules.push(s);
             }
         }
