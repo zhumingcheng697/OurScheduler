@@ -371,7 +371,7 @@ export default {
       // Make an array of dates to use for our yScale later on
       const minDate = d3.min(calendarEvents.map(d => new Date(d.timeFrom)));
       const maxDate = d3.max(calendarEvents.map(d => new Date(d.timeTo)));
-      const margin = { top: 30, right: 30, bottom: 0, left: 50 }; // Gives space for axes and other margins
+      const margin = { top: 30, right: 10, bottom: 0, left: 40 }; // Gives space for axes and other margins
       const hours = (maxDate - minDate) / 60 / 60000 + 2/3;
       const width = 920;
       const barHeight = 1600 * (hours / 24);
@@ -458,7 +458,7 @@ html > body {
   overflow: auto;
 }
 
-#d3-schedule {
+#d3-schedule > svg {
   margin: 0 20px;
 }
 
