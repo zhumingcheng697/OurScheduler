@@ -14,7 +14,7 @@
           <form @submit.prevent="setSchoolUrl">
             <label for="school-name">School Name</label>
             <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University">
-            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp">
+            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading">
           </form>
         </template>
       </Expandable>
@@ -29,7 +29,7 @@
           <form @submit.prevent="addClass">
             <label for="class-code">Class Name or Class Code</label>
             <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101">
-            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
+            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
                 <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)"><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
@@ -79,7 +79,7 @@
                 {{ addedClass.displayName }}
               </li>
             </ul>
-            <input class="centered-text" type="submit" value="Generate Schedule">
+            <input class="centered-text" type="submit" value="Generate Schedule" :disabled="loading">
           </form>
         </template>
       </Expandable>
@@ -91,7 +91,10 @@
           </div>
         </template>
         <template #content>
-          <div id="d3-schedule" ref="d3-schedule"></div>
+          <div id="d3-block"><div id="d3-schedule" ref="d3-schedule"></div></div>
+          <form @submit.prevent="swapSchedule">
+            <input class="centered-text" type="submit" value="Shuffle">
+          </form>
         </template>
       </Expandable>
     </div>
@@ -119,7 +122,8 @@ export default {
       classAmountSet: null,
       creditAmountSet: null,
       schoolId: "",
-      generatedSchedules: null
+      generatedSchedules: null,
+      currentScheduleIndex: null
     };
   },
   watch: {
@@ -155,10 +159,12 @@ export default {
     this.expand("university");
     // this.expand("schedules");
     // this.runD3([["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]])
+    // this.currentScheduleIndex = 0;
+    // this.generatedSchedules = [[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[660,740]],["OBJECT ORIENTED PROGRAMMING",[3540,3620]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[1020,1100]],["OBJECT ORIENTED PROGRAMMING",[3900,3980]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[570,650]],["OBJECT ORIENTED PROGRAMMING",[3450,3530]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6240,6410]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6420,6590]]],[["OBJECT ORIENTED PROGRAMMING",[930,1010]],["OBJECT ORIENTED PROGRAMMING",[3810,3890]],["OBJECT ORIENTED PROGRAMMING",[6600,6770]]]];
   },
   computed: {
     allowAddClass() {
-      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp.toUpperCase() || e.label === this.classTemp.toUpperCase());
+      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase() || e.label === this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase());
     },
     isClassAmountValid() {
       return /^(?:1[0-9]|[1-9])(?:-(?:1[0-9]|[1-9]))?$/.test(this.classAmountTemp);
@@ -244,7 +250,7 @@ export default {
       this.loading = true;
 
       const school = this.schoolId.toLowerCase();
-      const target = this.classTemp.toUpperCase();
+      const target = this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase();
       try {
         axios.get(`https://ourscheduler.herokuapp.com/retrieve/${school}/${target}`).then(({ data }) => {
           if (data) {
@@ -301,6 +307,11 @@ export default {
         return;
       }
 
+      if ((this.creditAmountSet && this.creditAmountSet[1] < d3.sum(this.classesSet.filter(el => el.locked), el => el.credits)) || (this.classAmountSet && this.classAmountSet[1] < this.classesSet.filter(el => el.locked).length)) {
+        alert(`Please unlock some classes so that we can meet your ${this.classAmountFormatted ? this.classAmountFormatted + " classes" : ""}${this.classAmountFormatted && this.creditAmountFormatted ? " and " : ""}${this.creditAmountFormatted ? this.creditAmountFormatted + " credits" : ""} requirement.`)
+        return;
+      }
+
       this.loading = true;
 
       const prop = {
@@ -319,6 +330,7 @@ export default {
       try {
         axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
           this.runD3(data[0]);
+          this.currentScheduleIndex = 0;
           this.generatedSchedules = data;
           this.loading = false;
           this.expand("schedules");
@@ -349,11 +361,12 @@ export default {
       // Make an array of dates to use for our yScale later on
       const minDate = d3.min(calendarEvents.map(d => new Date(d.timeFrom)));
       const maxDate = d3.max(calendarEvents.map(d => new Date(d.timeTo)));
-      const margin = { top: 45, right: 30, bottom: 20, left: 50 }; // Gives space for axes and other margins
+      const margin = { top: 30, right: 30, bottom: 0, left: 50 }; // Gives space for axes and other margins
       const hours = (maxDate - minDate) / 60 / 60000 + 2/3;
-      const height = 2000 * Math.min(1, hours / 24);
-      const width = 960;
+      const width = 920;
+      const barHeight = 1600 * (hours / 24);
       const barWidth = width - margin.left - margin.right;
+      const height = barHeight + 30;
       const barStyle = {
         background: "#616161",
         textColor: "#0e3945",
@@ -364,7 +377,7 @@ export default {
       const svg = d3.create("svg").attr("width", width).attr("height", height);
       // All further code additions will go just below this line
       const yScale = d3.scaleTime().domain([new Date(Math.max(STIME, minDate.valueOf() - 1 / 3 * 60 * 60 * 1000)), new Date(Math.min(ETIME, maxDate.valueOf() + 1 / 3 * 60 * 60 * 1000))]).range([margin.top, height - margin.bottom]);
-      const yAxis = d3.axisLeft().ticks(Math.ceil(hours)).scale(yScale);
+      const yAxis = d3.axisLeft().ticks(hours).scale(yScale);
       const xAxis = d3.axisTop().ticks(6).tickSize(height - margin.bottom - margin.up).tickSize(height - margin.bottom - margin.top).tickFormat("").scale(d3.scaleLinear().domain([0,6]).range([margin.left, width - margin.right]));
 
       svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.7).call(yAxis);
@@ -372,14 +385,14 @@ export default {
 
       svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).attr("opacity", 0.2).call(xAxis);
 
-      const gridLines = d3.axisRight().ticks(Math.ceil(hours * 2)).tickSize(barWidth) // even though they're "ticks" we've set them to be full-width
+      const gridLines = d3.axisRight().ticks(hours * 2).tickSize(barWidth) // even though they're "ticks" we've set them to be full-width
           .tickFormat("").scale(yScale);
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", barWidth / 12 + margin.left).attr("y", 32).text("Mon");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 3 * barWidth / 12 + margin.left).attr("y", 32).text("Tue");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 5 * barWidth / 12 + margin.left).attr("y", 32).text("Wed");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 7 * barWidth / 12 + margin.left).attr("y", 32).text("Thu");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 9 * barWidth / 12 + margin.left).attr("y", 32).text("Fri");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 11 * barWidth / 12 + margin.left).attr("y", 32).text("Sat");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", barWidth / 12 + margin.left).attr("y", 20).text("Mon");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 3 * barWidth / 12 + margin.left).attr("y", 20).text("Tue");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 5 * barWidth / 12 + margin.left).attr("y", 20).text("Wed");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 7 * barWidth / 12 + margin.left).attr("y", 20).text("Thu");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 9 * barWidth / 12 + margin.left).attr("y", 20).text("Fri");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 11 * barWidth / 12 + margin.left).attr("y", 20).text("Sat");
       svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.2).call(gridLines);
       const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
       barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("stroke-width", "2px").attr("stroke", () => "#ccdfe3").attr("x", d => margin.left + barWidth / 6 * d.day + 1).attr("y", d => yScale(new Date(d.timeFrom)) + 1).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 2).attr("width", barWidth / 6 - 2);
@@ -402,6 +415,18 @@ export default {
       }
       element.append(svg.node());
       // This part ^ always goes at the end of our index.js
+    },
+    swapSchedule() {
+      let currStr;
+      let nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
+
+      do {
+        currStr = nextStr;
+        this.currentScheduleIndex = (this.currentScheduleIndex + 1) % this.generatedSchedules.length;
+        nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
+      } while (nextStr === currStr)
+
+      this.runD3(this.generatedSchedules[this.currentScheduleIndex]);
     }
   }
 };
@@ -416,6 +441,15 @@ html > body {
   min-height: 100vh;
   max-width: 960px;
   margin: 0 auto;
+}
+
+#d3-block {
+  margin: 40px 0 10px 0;
+  overflow: auto;
+}
+
+#d3-schedule {
+  margin: 0 20px;
 }
 
 svg body {
@@ -436,7 +470,7 @@ svg div.block__text {
 
 svg p {
   font-size: 0.8em;
-  margin: 3px;
+  margin: 1px;
   padding: 0;
   font-family: 'Open Sans', sans-serif;
   text-align: center;
@@ -507,7 +541,7 @@ form {
   align-items: center;
 }
 
-form > *:first-child {
+form:not(div + form) > *:first-child {
   margin-top: 40px;
 }
 
@@ -595,6 +629,7 @@ li {
 }
 
 footer {
+  font-weight: 600;
   margin: 20px;
 }
 
@@ -611,9 +646,5 @@ footer {
 
 #app.loading * {
   cursor: wait;
-}
-
-#d3-schedule {
-  overflow: auto;
 }
 </style>
