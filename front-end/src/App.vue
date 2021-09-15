@@ -85,7 +85,7 @@
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || !currentScheduleIndex}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && currentScheduleIndex && toggle(id)">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || typeof currentScheduleIndex !== 'number'}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && typeof currentScheduleIndex === 'number' && toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Schedules</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
