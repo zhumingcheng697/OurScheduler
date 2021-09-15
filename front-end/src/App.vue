@@ -85,7 +85,7 @@
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && toggle(id)">
+          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || !currentScheduleIndex}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && currentScheduleIndex && toggle(id)">
             <p :style="{ marginRight: '10px'}"><strong>Schedules</strong></p>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </div>
@@ -279,7 +279,7 @@ export default {
     },
     toggleClassLock(index) {
       this.classesSet[index].locked = !this.classesSet[index].locked;
-      this.generatedSchedules = null;
+      this.currentScheduleIndex = null;
     },
     setClassCredit() {
       if (this.classAmountTemp !== this.classAmountFormatted || this.creditAmountTemp !== this.creditAmountFormatted) {
@@ -326,7 +326,7 @@ export default {
 
       const propStr = JSON.stringify(prop);
 
-      if (this.prevProp === propStr) {
+      if (this.prevProp === propStr && this.generatedSchedules && typeof this.currentScheduleIndex === "number") {
         this.expand("schedules");
         return;
       } else {
@@ -334,6 +334,7 @@ export default {
         this.prevProp = propStr;
       }
 
+      this.currentScheduleIndex = null;
       this.generatedSchedules = null;
 
       try {
