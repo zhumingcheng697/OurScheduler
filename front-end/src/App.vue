@@ -13,7 +13,7 @@
         <template #content>
           <form @submit.prevent="setSchoolUrl">
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University">
+            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization">
             <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading">
           </form>
         </template>
@@ -28,7 +28,7 @@
         <template #content>
           <form @submit.prevent="addClass">
             <label for="class-code">Class Name or Class Code</label>
-            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101">
+            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
@@ -50,9 +50,9 @@
         <template #content>
           <form @submit.prevent="setClassCredit">
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5">
+            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off">
             <label for="credit-amount">Number of Credits</label>
-            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18">
+            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
           </form>
         </template>
