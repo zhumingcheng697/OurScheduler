@@ -91,7 +91,7 @@
           </div>
         </template>
         <template #content>
-          <div id="d3-block"><div id="d3-schedule" ref="d3-schedule"></div></div>
+          <div id="d3-schedule" ref="d3-schedule"></div>
           <form @submit.prevent="swapSchedule">
             <input class="centered-text" type="submit" value="Shuffle">
           </form>
@@ -453,7 +453,7 @@ html > body {
   margin: 0 auto;
 }
 
-#d3-block {
+#d3-schedule {
   margin: 40px 0 10px 0;
   overflow: auto;
 }
