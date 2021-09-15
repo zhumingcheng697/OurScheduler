@@ -13,7 +13,7 @@
         <template #content>
           <form @submit.prevent="setSchoolUrl">
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University">
+            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University">
             <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp">
           </form>
         </template>
@@ -28,12 +28,12 @@
         <template #content>
           <form @submit.prevent="addClass">
             <label for="class-code">Class Name or Class Code</label>
-            <input class="centered-text" id="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101">
+            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-                <span :style="{ marginRight: '5px'}" class="clickable" @click="classesSet[index].locked = !classesSet[index].locked"><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
-                {{ addedClass.name }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
+                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)"><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
+                {{ addedClass.displayName }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
               </li>
             </ul>
             <label v-if="classesSet.length">Click &#9734; to lock or unlock each class from your schedule.</label>
@@ -50,9 +50,9 @@
         <template #content>
           <form @submit.prevent="setClassCredit">
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" type="text" id="class-amount" v-model="classAmountTemp" placeholder="4-5">
+            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5">
             <label for="credit-amount">Number of Credits</label>
-            <input class="centered-text" type="text" id="credit-amount" v-model="creditAmountTemp" placeholder="12-18">
+            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
           </form>
         </template>
@@ -76,7 +76,7 @@
             <ul v-if="classesSet.length" class="clickable" @click="expand('classes')">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
                 <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
-                {{ addedClass.name }}
+                {{ addedClass.displayName }}
               </li>
             </ul>
             <input class="centered-text" type="submit" value="Generate Schedule">
@@ -153,10 +153,12 @@ export default {
   },
   mounted() {
     this.expand("university");
+    // this.expand("schedules");
+    // this.runD3([["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]])
   },
   computed: {
     allowAddClass() {
-      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp);
+      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp.toUpperCase() || e.label === this.classTemp.toUpperCase());
     },
     isClassAmountValid() {
       return /^(?:1[0-9]|[1-9])(?:-(?:1[0-9]|[1-9]))?$/.test(this.classAmountTemp);
@@ -249,8 +251,8 @@ export default {
             this.classTemp = "";
 
             const displayName = `${data.name} (${data.label})`;
-            if (!this.classesSet.find((el) => el.name === displayName)) {
-              this.classesSet.push({ locked: false, name: displayName, label: data.label });
+            if (!this.classesSet.find((el) => el.name === data.name)) {
+              this.classesSet.push({ locked: false, credits: data.credits, name: data.name, displayName: displayName, label: data.label });
             }
             this.loading = false;
           } else {
@@ -267,6 +269,10 @@ export default {
         alert("Unfortunately, something went wrong.");
         this.loading = false;
       }
+    },
+    toggleClassLock(index) {
+      this.classesSet[index].locked = !this.classesSet[index].locked;
+      this.generatedSchedules = null;
     },
     setClassCredit() {
       if (this.classAmountTemp !== this.classAmountFormatted || this.creditAmountTemp !== this.creditAmountFormatted) {
@@ -290,6 +296,11 @@ export default {
       this.expand(this.classesSet.length ? "summary" : "classes");
     },
     generateSchedule() {
+      if ((this.creditAmountSet && this.creditAmountSet[0] > d3.sum(this.classesSet, el => el.credits)) || (this.classAmountSet && this.classAmountSet[0] > this.classesSet.length)) {
+        alert(`Please add more classes so that we can meet your ${this.classAmountFormatted ? this.classAmountFormatted + " classes" : ""}${this.classAmountFormatted && this.creditAmountFormatted ? " and " : ""}${this.creditAmountFormatted ? this.creditAmountFormatted + " credits" : ""} requirement.`)
+        return;
+      }
+
       this.loading = true;
 
       const prop = {
@@ -323,91 +334,74 @@ export default {
       }
     },
     runD3(schedules) {
-
-      const STIME = 1605070800000;
-      const ETIME = 1605157200000;
-      const calendarEvents = [
-        {
-          timeFrom: STIME,
-          timeTo: STIME,
-          title: "",
-          background: "#EBECF0",
-          day: 0
-        },
-        {
-          timeFrom: ETIME,
-          timeTo: ETIME,
-          title: "",
-          background: "#EBECF0",
-          day: 0
-        }
-      ];
+      const STIME = Date.parse("1 Jan 1970 00:00:00").valueOf();
+      const ETIME = STIME + 24 * 60 * 60 * 1000;
+      const calendarEvents = [];
       for (let i = 0; i < schedules.length; i++) {
         calendarEvents.push({
           timeFrom: schedules[i][1][0] % 1440 * 60000 + STIME,
           timeTo: schedules[i][1][1] % 1440 * 60000 + STIME,
           title: schedules[i][0],
-          background: "#EBECF0",
+          background: "#e4eff2",
           day: parseInt(schedules[i][1][0] / 1440)
         });
       }
-// Make an array of dates to use for our yScale later on
-      const dates = [
-        ...calendarEvents.map(d => new Date(d.timeFrom)),
-        ...calendarEvents.map(d => new Date(d.timeTo))
-      ];
-      const margin = { top: 45, right: 30, bottom: 30, left: 50 }; // Gives space for axes and other margins
-      const height = 1500;
+      // Make an array of dates to use for our yScale later on
+      const minDate = d3.min(calendarEvents.map(d => new Date(d.timeFrom)));
+      const maxDate = d3.max(calendarEvents.map(d => new Date(d.timeTo)));
+      const margin = { top: 45, right: 30, bottom: 20, left: 50 }; // Gives space for axes and other margins
+      const hours = (maxDate - minDate) / 60 / 60000 + 2/3;
+      const height = 2000 * Math.min(1, hours / 24);
       const width = 960;
-      const barWidth = 900;
-      const barHeight = 1475;
-      // const nowColor = "#EA4335";
+      const barWidth = width - margin.left - margin.right;
       const barStyle = {
         background: "#616161",
-        textColor: "black",
-        dayColor: "black",
-        width: barWidth,
-        height: barHeight,
-        startPadding: 2,
-        endPadding: 3,
-        radius: 3
+        textColor: "#0e3945",
+        dayColor: "#0e3945"
       };
-// Create the SVG element
+
+      // Create the SVG element
       const svg = d3.create("svg").attr("width", width).attr("height", height);
-// All further code additions will go just below this line
-      const yScale = d3.scaleTime().domain([d3.min(dates), d3.max(dates)]).range([margin.top, height - margin.bottom]);
-      const yAxis = d3.axisLeft().ticks(24).scale(yScale);
+      // All further code additions will go just below this line
+      const yScale = d3.scaleTime().domain([new Date(Math.max(STIME, minDate.valueOf() - 1 / 3 * 60 * 60 * 1000)), new Date(Math.min(ETIME, maxDate.valueOf() + 1 / 3 * 60 * 60 * 1000))]).range([margin.top, height - margin.bottom]);
+      const yAxis = d3.axisLeft().ticks(Math.ceil(hours)).scale(yScale);
+      const xAxis = d3.axisTop().ticks(6).tickSize(height - margin.bottom - margin.up).tickSize(height - margin.bottom - margin.top).tickFormat("").scale(d3.scaleLinear().domain([0,6]).range([margin.left, width - margin.right]));
 
-      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.5).call(yAxis);
-      svg.selectAll("g.tick").filter((d, i, ticks) => i === 0 || i === ticks.length - 1).select("text").text("12 AM");
+      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.7).call(yAxis);
+      svg.selectAll("g.tick").filter(d => d.getMinutes() === 0 && d.getHours() === 0).select("text").text("12 AM");
 
-      const gridLines = d3.axisRight().ticks(24).tickSize(barStyle.width) // even though they're "ticks" we've set them to be full-width
+      svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).attr("opacity", 0.2).call(xAxis);
+
+      const gridLines = d3.axisRight().ticks(Math.ceil(hours * 2)).tickSize(barWidth) // even though they're "ticks" we've set them to be full-width
           .tickFormat("").scale(yScale);
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 85).attr("y", 32).text("Monday");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 235).attr("y", 32).text("Tuesday");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 370).attr("y", 32).text("Wednesday");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 530).attr("y", 32).text("Thursday");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 695).attr("y", 32).text("Friday");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.dayColor).attr("x", 835).attr("y", 32).text("Saturday");
-      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.3).call(gridLines);
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", barWidth / 12 + margin.left).attr("y", 32).text("Mon");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 3 * barWidth / 12 + margin.left).attr("y", 32).text("Tue");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 5 * barWidth / 12 + margin.left).attr("y", 32).text("Wed");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 7 * barWidth / 12 + margin.left).attr("y", 32).text("Thu");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 9 * barWidth / 12 + margin.left).attr("y", 32).text("Fri");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 11 * barWidth / 12 + margin.left).attr("y", 32).text("Sat");
+      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.2).call(gridLines);
       const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
-      barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("x", d => margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + barStyle.startPadding).attr("height", d => {
-        const startPoint = yScale(new Date(d.timeFrom));
-        const endPoint = yScale(new Date(d.timeTo));
-        return (
-            endPoint - startPoint - barStyle.endPadding - barStyle.startPadding
-        );
-      }).attr("width", barWidth / 6).attr("rx", barStyle.radius);
-      barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "start").attr("fill", barStyle.textColor).attr("x", d => 10 + margin.left + barWidth / 6 * d.day).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
+      barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("stroke-width", "2px").attr("stroke", () => "#ccdfe3").attr("x", d => margin.left + barWidth / 6 * d.day + 1).attr("y", d => yScale(new Date(d.timeFrom)) + 1).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 2).attr("width", barWidth / 6 - 2);
+      // barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.textColor).attr("x", d => (1 + 2 * d.day) * barWidth / 12 + margin.left).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
-// Actually add the element to the page
+      barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").style("color", barStyle.textColor).html(d => `<div class="block__text"><p>${d.title}</p><p>${new Date(d.timeFrom).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      })}–${new Date(d.timeTo).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      })}</p></div>`);
+
+      // Actually add the element to the page
       const element = this.$refs["d3-schedule"];
       while (element.firstChild) {
         element.removeChild(element.firstChild);
       }
       element.append(svg.node());
-      // document.body.append(svg.node());
-// This part ^ always goes at the end of our index.js
+      // This part ^ always goes at the end of our index.js
     }
   }
 };
@@ -416,13 +410,36 @@ export default {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 
-body {
+html > body {
   background: #f0f8fa;
-  /*margin: 0;*/
   padding: 0;
   min-height: 100vh;
   max-width: 960px;
   margin: 0 auto;
+}
+
+svg body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto;
+}
+
+svg div.block__text {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
+svg p {
+  font-size: 0.8em;
+  margin: 3px;
+  padding: 0;
+  font-family: 'Open Sans', sans-serif;
+  text-align: center;
 }
 
 span {
@@ -530,7 +547,7 @@ input[type=text] {
   width: min(800px, calc(100% - 40px));
   outline: none;
   border: solid #bfd5db 2px;
-  padding: 10px 20px;
+  padding: 10px 0;
   border-radius: 10px;
   font-size: 1.4em;
 }
