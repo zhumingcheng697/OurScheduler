@@ -123,7 +123,8 @@ export default {
       creditAmountSet: null,
       schoolId: "",
       generatedSchedules: null,
-      currentScheduleIndex: null
+      currentScheduleIndex: null,
+      prevProp: ""
     };
   },
   watch: {
@@ -312,8 +313,6 @@ export default {
         return;
       }
 
-      this.loading = true;
-
       const prop = {
         classList: this.classesSet.map((el) => ([this.schoolId.toLowerCase(), el.label.toUpperCase()])),
         locked: this.classesSet.filter((el) => el.locked).map((el) => el.label),
@@ -324,6 +323,16 @@ export default {
           maxCourses: this.classAmountSet && this.classAmountSet[1] || 19
         }
       };
+
+      const propStr = JSON.stringify(prop);
+
+      if (this.prevProp === propStr) {
+        this.expand("schedules");
+        return;
+      } else {
+        this.loading = true;
+        this.prevProp = propStr;
+      }
 
       this.generatedSchedules = null;
 
@@ -579,7 +588,6 @@ input[type=text] {
   -webkit-border-radius: 0;
   box-sizing: border-box;
   width: min(800px, calc(100% - 40px));
-  outline: none;
   border: solid #bfd5db 2px;
   padding: 10px 0;
   border-radius: 10px;
@@ -593,7 +601,6 @@ input[type=submit] {
   background: #daecf0;
   cursor: pointer;
   border: none;
-  outline: none;
   border-radius: 10px;
   padding: 12px 25px;
   font-size: 0.9em;
