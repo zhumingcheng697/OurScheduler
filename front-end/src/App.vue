@@ -180,13 +180,13 @@ export default {
     },
     classAmountFormatted() {
       if (this.classAmountSet) {
-        return this.classAmountSet[0] === this.classAmountSet[1] ? `${this.classAmountSet[0]}` : this.classAmountSet.join("-");
+        return this.classAmountSet[0] === this.classAmountSet[1] ? `${ this.classAmountSet[0] }` : this.classAmountSet.join("-");
       }
       return "";
     },
     creditAmountFormatted() {
       if (this.creditAmountSet) {
-        return this.creditAmountSet[0] === this.creditAmountSet[1] ? `${this.creditAmountSet[0]}` : this.creditAmountSet.join("-");
+        return this.creditAmountSet[0] === this.creditAmountSet[1] ? `${ this.creditAmountSet[0] }` : this.creditAmountSet.join("-");
       }
       return "";
     },
@@ -235,7 +235,7 @@ export default {
 
         const target = this.schoolNameTemp;
 
-        axios.get(`https://ourscheduler.herokuapp.com/search/${target}`).then(({ data }) => {
+        axios.get(`https://ourscheduler.herokuapp.com/search/${ target }`).then(({ data }) => {
           if (typeof data === "string") {
             this.schoolId = data.toUpperCase();
             this.expand("classes");
@@ -265,11 +265,11 @@ export default {
       const school = this.schoolId.toLowerCase();
       const target = this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase();
       try {
-        axios.get(`https://ourscheduler.herokuapp.com/retrieve/${school}/${target}`).then(({ data }) => {
+        axios.get(`https://ourscheduler.herokuapp.com/retrieve/${ school }/${ target }`).then(({ data }) => {
           if (data) {
             this.classTemp = "";
 
-            const displayName = `${data.name} (${data.label})`;
+            const displayName = `${ data.name } (${ data.label })`;
             if (!this.classesSet.find((el) => el.name === data.name)) {
               this.classesSet.push({
                 locked: false,
@@ -356,7 +356,7 @@ export default {
       const creditIssue = notEnoughCreditSelected || tooManyCreditLocked;
 
       if (notEnoughSelected || tooMuchLocked) {
-        alert(`Please ${notEnoughSelected ? "add more classes" : ""}${notEnoughSelected && tooMuchLocked ? " and " : ""}${tooMuchLocked ? "unlock some classes" : ""} so that we can meet your ${classIssue ? this.classAmountFormattedLong(false) : ""}${classIssue && creditIssue ? " and " : ""}${creditIssue ? this.creditAmountFormattedLong(false) : ""} requirement.`);
+        alert(`Please ${ notEnoughSelected ? "add more classes" : "" }${ notEnoughSelected && tooMuchLocked ? " and " : "" }${ tooMuchLocked ? "unlock some classes" : "" } so that we can meet your ${ classIssue ? this.classAmountFormattedLong(false) : "" }${ classIssue && creditIssue ? " and " : "" }${ creditIssue ? this.creditAmountFormattedLong(false) : "" } requirement.`);
         return;
       }
 
@@ -386,7 +386,7 @@ export default {
       this.generatedSchedules = null;
 
       try {
-        axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
+        axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${ encodeURI(JSON.stringify(prop)) }`).then(({ data }) => {
           this.runD3(data[0]);
           this.currentScheduleIndex = 0;
           this.noShuffle = data.length < 2;
@@ -439,10 +439,10 @@ export default {
       const yAxis = d3.axisLeft().ticks(hours).scale(yScale);
       const xAxis = d3.axisTop().ticks(6).tickSize(height - margin.bottom - margin.up).tickSize(height - margin.bottom - margin.top).tickFormat("").scale(d3.scaleLinear().domain([0, 6]).range([margin.left, width - margin.right]));
 
-      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.7).call(yAxis);
+      svg.append("g").attr("transform", `translate(${ margin.left },0)`).attr("opacity", 0.7).call(yAxis);
       svg.selectAll("g.tick").filter(d => d.getMinutes() === 0 && d.getHours() === 0).select("text").text("12 AM");
 
-      svg.append("g").attr("transform", `translate(0,${height - margin.bottom})`).attr("opacity", 0.2).call(xAxis);
+      svg.append("g").attr("transform", `translate(0,${ height - margin.bottom })`).attr("opacity", 0.2).call(xAxis);
 
       const gridLines = d3.axisRight().ticks(hours * 2).tickSize(barWidth) // even though they're "ticks" we've set them to be full-width
           .tickFormat("").scale(yScale);
@@ -452,20 +452,20 @@ export default {
       svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 7 * barWidth / 12 + margin.left).attr("y", 20).text("Thu");
       svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 9 * barWidth / 12 + margin.left).attr("y", 20).text("Fri");
       svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 11 * barWidth / 12 + margin.left).attr("y", 20).text("Sat");
-      svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.2).call(gridLines);
+      svg.append("g").attr("transform", `translate(${ margin.left },0)`).attr("opacity", 0.2).call(gridLines);
       const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
       barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("stroke-width", "2px").attr("stroke", () => "#ccdfe3").attr("x", d => margin.left + barWidth / 6 * d.day + 1).attr("y", d => yScale(new Date(d.timeFrom)) + 1).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 2).attr("width", barWidth / 6 - 2);
       // barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.textColor).attr("x", d => (1 + 2 * d.day) * barWidth / 12 + margin.left).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
-      barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").style("color", barStyle.textColor).html(d => `<div class="block__text"><p>${d.title}</p><p>${new Date(d.timeFrom).toLocaleTimeString("en-US", {
+      barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").style("color", barStyle.textColor).html(d => `<div class="block__text"><p>${ d.title }</p><p>${ new Date(d.timeFrom).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
-      })}–${new Date(d.timeTo).toLocaleTimeString("en-US", {
+      }) }–${ new Date(d.timeTo).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
-      })}</p></div>`);
+      }) }</p></div>`);
 
       // Actually add the element to the page
       const element = this.$refs["d3-schedule"];
