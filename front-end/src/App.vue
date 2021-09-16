@@ -54,6 +54,7 @@
             <label for="credit-amount">Number of Credits</label>
             <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
+            <label>You have selected {{ classesSet.length }} class{{ classesSet.length === 1 ? "" : "es" }} worth of {{ creditSum }} credit{{ creditSum === 1 ? "" : "s" }} so far.</label>
           </form>
         </template>
       </Expandable>
@@ -69,9 +70,9 @@
             <p class="clickable" @click="expand('university')">
               <strong>{{ schoolId }}</strong></p>
             <p class="clickable" @click="expand('amount')">
-              <span v-if="classAmountFormatted">{{ classAmountFormatted }} Classes</span>
-              <span v-if="classAmountFormatted && creditAmountFormatted">, </span>
-              <span v-if="creditAmountFormatted">{{ creditAmountFormatted }} Credits</span>
+              <span v-if="classAmountSet">{{ classAmountFormattedLong(true) }}</span>
+              <span v-if="classAmountSet && creditAmountSet">, </span>
+              <span v-if="creditAmountSet">{{ creditAmountFormattedLong(true) }}</span>
             </p>
             <ul v-if="classesSet.length" class="clickable" @click="expand('classes')">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
@@ -187,6 +188,12 @@ export default {
         return this.creditAmountSet[0] === this.creditAmountSet[1] ? `${this.creditAmountSet[0]}` : this.creditAmountSet.join("-");
       }
       return "";
+    },
+    creditSum() {
+      return d3.sum(this.classesSet, el => el.credits);
+    },
+    lockedCreditSum() {
+      return d3.sum(this.classesSet.filter(el => el.locked), el => el.credits);
     }
   },
   components: {
@@ -259,7 +266,13 @@ export default {
 
             const displayName = `${data.name} (${data.label})`;
             if (!this.classesSet.find((el) => el.name === data.name)) {
-              this.classesSet.push({ locked: false, credits: data.credits, name: data.name, displayName: displayName, label: data.label });
+              this.classesSet.push({
+                locked: false,
+                credits: data.credits,
+                name: data.name,
+                displayName: displayName,
+                label: data.label
+              });
             }
             this.loading = false;
           } else {
@@ -302,14 +315,41 @@ export default {
 
       this.expand(this.classesSet.length ? "summary" : "classes");
     },
+    classAmountFormattedLong(cap) {
+      if (this.classAmountSet) {
+        return this.classAmountFormatted + (cap ? " Class" : " class") + (this.classAmountFormatted === "1" ? "" : "es");
+      }
+      return "";
+    },
+    creditAmountFormattedLong(cap) {
+      if (this.creditAmountSet) {
+        return this.creditAmountFormatted + (cap ? " Credit" : " credit") + (this.creditAmountFormatted === "1" ? "" : "s");
+      }
+      return "";
+    },
     generateSchedule() {
-      if ((this.creditAmountSet && this.creditAmountSet[0] > d3.sum(this.classesSet, el => el.credits)) || (this.classAmountSet && this.classAmountSet[0] > this.classesSet.length)) {
-        alert(`Please add more classes so that we can meet your ${this.classAmountFormatted ? this.classAmountFormatted + " classes" : ""}${this.classAmountFormatted && this.creditAmountFormatted ? " and " : ""}${this.creditAmountFormatted ? this.creditAmountFormatted + " credits" : ""} requirement.`)
-        return;
+      let notEnoughClassSelected = false;
+      let notEnoughCreditSelected = false;
+      let tooManyClassLocked = false;
+      let tooManyCreditLocked = false;
+
+      if (this.classAmountSet) {
+        notEnoughClassSelected = this.classAmountSet[0] > this.classesSet.length;
+        tooManyClassLocked = this.classAmountSet[1] < this.classesSet.filter(el => el.locked).length;
       }
 
-      if ((this.creditAmountSet && this.creditAmountSet[1] < d3.sum(this.classesSet.filter(el => el.locked), el => el.credits)) || (this.classAmountSet && this.classAmountSet[1] < this.classesSet.filter(el => el.locked).length)) {
-        alert(`Please unlock some classes so that we can meet your ${this.classAmountFormatted ? this.classAmountFormatted + " classes" : ""}${this.classAmountFormatted && this.creditAmountFormatted ? " and " : ""}${this.creditAmountFormatted ? this.creditAmountFormatted + " credits" : ""} requirement.`)
+      if (this.creditAmountSet) {
+        notEnoughCreditSelected = this.creditAmountSet[0] > this.creditSum;
+        tooManyCreditLocked = this.creditAmountSet[1] < this.lockedCreditSum;
+      }
+
+      const notEnoughSelected = notEnoughClassSelected || notEnoughCreditSelected;
+      const tooMuchLocked = tooManyClassLocked || tooManyCreditLocked;
+      const classIssue = notEnoughClassSelected || tooManyClassLocked;
+      const creditIssue = notEnoughCreditSelected || tooManyCreditLocked;
+
+      if (notEnoughSelected || tooMuchLocked) {
+        alert(`Please ${notEnoughSelected ? "add more classes" : ""}${notEnoughSelected && tooMuchLocked ? " and " : ""}${tooMuchLocked ? "unlock some classes" : ""} so that we can meet your ${classIssue ? this.classAmountFormattedLong(false) : ""}${classIssue && creditIssue ? " and " : ""}${creditIssue ? this.creditAmountFormattedLong(false) : ""} requirement.`);
         return;
       }
 
@@ -373,7 +413,7 @@ export default {
       const minDate = d3.min(calendarEvents.map(d => new Date(d.timeFrom)));
       const maxDate = d3.max(calendarEvents.map(d => new Date(d.timeTo)));
       const margin = { top: 30, right: 10, bottom: 0, left: 40 }; // Gives space for axes and other margins
-      const hours = (maxDate - minDate) / 60 / 60000 + 2/3;
+      const hours = (maxDate - minDate) / 60 / 60000 + 2 / 3;
       const width = 920;
       const barHeight = 1600 * (hours / 24);
       const barWidth = width - margin.left - margin.right;
@@ -389,7 +429,7 @@ export default {
       // All further code additions will go just below this line
       const yScale = d3.scaleTime().domain([new Date(Math.max(STIME, minDate.valueOf() - 1 / 3 * 60 * 60 * 1000)), new Date(Math.min(ETIME, maxDate.valueOf() + 1 / 3 * 60 * 60 * 1000))]).range([margin.top, height - margin.bottom]);
       const yAxis = d3.axisLeft().ticks(hours).scale(yScale);
-      const xAxis = d3.axisTop().ticks(6).tickSize(height - margin.bottom - margin.up).tickSize(height - margin.bottom - margin.top).tickFormat("").scale(d3.scaleLinear().domain([0,6]).range([margin.left, width - margin.right]));
+      const xAxis = d3.axisTop().ticks(6).tickSize(height - margin.bottom - margin.up).tickSize(height - margin.bottom - margin.top).tickFormat("").scale(d3.scaleLinear().domain([0, 6]).range([margin.left, width - margin.right]));
 
       svg.append("g").attr("transform", `translate(${margin.left},0)`).attr("opacity", 0.7).call(yAxis);
       svg.selectAll("g.tick").filter(d => d.getMinutes() === 0 && d.getHours() === 0).select("text").text("12 AM");
@@ -435,7 +475,7 @@ export default {
         currStr = nextStr;
         this.currentScheduleIndex = (this.currentScheduleIndex + 1) % this.generatedSchedules.length;
         nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
-      } while (nextStr === currStr)
+      } while (nextStr === currStr);
 
       this.runD3(this.generatedSchedules[this.currentScheduleIndex]);
     }
