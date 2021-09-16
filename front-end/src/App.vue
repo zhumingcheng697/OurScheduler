@@ -217,6 +217,8 @@ export default {
       }, 1);
     },
     setSchoolUrl() {
+      if (this.loading) {return;}
+
       if (this.schoolId !== this.schoolNameTemp) {
         this.classTemp = "";
         this.classesSet = [];
@@ -255,6 +257,8 @@ export default {
       }
     },
     addClass() {
+      if (this.loading) {return;}
+
       this.currentScheduleIndex = null;
       this.loading = true;
 
@@ -329,6 +333,8 @@ export default {
       return "";
     },
     generateSchedule() {
+      if (this.loading) {return;}
+
       let notEnoughClassSelected = false;
       let notEnoughCreditSelected = false;
       let tooManyClassLocked = false;
@@ -470,9 +476,7 @@ export default {
       // This part ^ always goes at the end of our index.js
     },
     swapSchedule() {
-      if (this.noShuffle) {
-        return;
-      }
+      if (this.noShuffle) { return; }
 
       let currStr;
       let nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
