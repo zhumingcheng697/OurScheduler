@@ -94,7 +94,7 @@
         <template #content>
           <div id="d3-schedule" ref="d3-schedule"></div>
           <form @submit.prevent="swapSchedule">
-            <input class="centered-text" type="submit" value="Shuffle">
+            <input class="centered-text" type="submit" value="Shuffle" :disabled="noShuffle">
           </form>
         </template>
       </Expandable>
@@ -125,6 +125,7 @@ export default {
       schoolId: "",
       generatedSchedules: null,
       currentScheduleIndex: null,
+      noShuffle: false,
       prevProp: ""
     };
   },
@@ -382,6 +383,7 @@ export default {
         axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${encodeURI(JSON.stringify(prop))}`).then(({ data }) => {
           this.runD3(data[0]);
           this.currentScheduleIndex = 0;
+          this.noShuffle = data.length < 2;
           this.generatedSchedules = data;
           this.loading = false;
           this.expand("schedules");
@@ -468,14 +470,23 @@ export default {
       // This part ^ always goes at the end of our index.js
     },
     swapSchedule() {
+      if (this.noShuffle) {
+        return;
+      }
+
       let currStr;
       let nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
+      const lastIndex = this.currentScheduleIndex;
 
       do {
         currStr = nextStr;
         this.currentScheduleIndex = (this.currentScheduleIndex + 1) % this.generatedSchedules.length;
         nextStr = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
-      } while (nextStr === currStr);
+      } while (nextStr === currStr && lastIndex !== this.currentScheduleIndex);
+
+      if (lastIndex === this.currentScheduleIndex) {
+        this.noShuffle = true;
+      }
 
       this.runD3(this.generatedSchedules[this.currentScheduleIndex]);
     }
