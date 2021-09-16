@@ -153,7 +153,7 @@ export default {
       }
     },
     classesSet() {
-      this.generatedSchedules = null;
+      this.currentScheduleIndex = null;
     }
   },
   mounted() {
@@ -212,7 +212,7 @@ export default {
       if (this.schoolId !== this.schoolNameTemp) {
         this.classTemp = "";
         this.classesSet = [];
-        this.generatedSchedules = null;
+        this.currentScheduleIndex = null;
       } else {
         this.expand("classes");
         return;
@@ -247,7 +247,7 @@ export default {
       }
     },
     addClass() {
-      this.generatedSchedules = null;
+      this.currentScheduleIndex = null;
       this.loading = true;
 
       const school = this.schoolId.toLowerCase();
@@ -283,7 +283,7 @@ export default {
     },
     setClassCredit() {
       if (this.classAmountTemp !== this.classAmountFormatted || this.creditAmountTemp !== this.creditAmountFormatted) {
-        this.generatedSchedules = null;
+        this.currentScheduleIndex = null;
       }
 
       if (this.classAmountTemp) {
@@ -326,7 +326,8 @@ export default {
 
       const propStr = JSON.stringify(prop);
 
-      if (this.prevProp === propStr && this.generatedSchedules && typeof this.currentScheduleIndex === "number") {
+      if (this.prevProp === propStr && this.generatedSchedules) {
+        this.currentScheduleIndex = 0;
         this.expand("schedules");
         return;
       } else {
