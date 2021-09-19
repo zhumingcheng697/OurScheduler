@@ -56,7 +56,6 @@ export default {
 <style>
 .expandable > .expandable__content {
   overflow: hidden;
-  transition: height 0.5s, opacity 0.5s;
 }
 
 .expandable.expanded.animating > .expandable__content {

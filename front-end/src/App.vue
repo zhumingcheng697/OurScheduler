@@ -32,7 +32,7 @@
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)"><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
+                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
               </li>
             </ul>
@@ -76,7 +76,7 @@
             </p>
             <ul v-if="classesSet.length" class="clickable" @click="expand('classes')">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-                <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" :style="{color: '#ff2', textShadow: '0 0 2px #3309'}">&#9733;</strong><strong v-else>&#9734;</strong></span>
+                <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}
               </li>
             </ul>
@@ -204,17 +204,17 @@ export default {
     expand(id) {
       setTimeout(() => {
         this.expandedSection = id;
-      }, 1);
+      }, 5);
     },
     collapse() {
       setTimeout(() => {
         this.expandedSection = "";
-      }, 1);
+      }, 5);
     },
     toggle(id) {
       setTimeout(() => {
         this.expandedSection = (this.expandedSection === id) ? "" : id;
-      }, 1);
+      }, 5);
     },
     setSchoolUrl() {
       if (this.loading) {return;}
@@ -413,7 +413,6 @@ export default {
           timeFrom: schedules[i][1][0] % 1440 * 60000 + STIME,
           timeTo: schedules[i][1][1] % 1440 * 60000 + STIME,
           title: schedules[i][0],
-          background: "#e4eff2",
           day: parseInt(schedules[i][1][0] / 1440)
         });
       }
@@ -426,11 +425,6 @@ export default {
       const barHeight = 1600 * (hours / 24);
       const barWidth = width - margin.left - margin.right;
       const height = barHeight + 30;
-      const barStyle = {
-        background: "#616161",
-        textColor: "#0e3945",
-        dayColor: "#0e3945"
-      };
 
       // Create the SVG element
       const svg = d3.create("svg").attr("width", width).attr("height", height);
@@ -446,18 +440,18 @@ export default {
 
       const gridLines = d3.axisRight().ticks(hours * 2).tickSize(barWidth) // even though they're "ticks" we've set them to be full-width
           .tickFormat("").scale(yScale);
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", barWidth / 12 + margin.left).attr("y", 20).text("Mon");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 3 * barWidth / 12 + margin.left).attr("y", 20).text("Tue");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 5 * barWidth / 12 + margin.left).attr("y", 20).text("Wed");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 7 * barWidth / 12 + margin.left).attr("y", 20).text("Thu");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 9 * barWidth / 12 + margin.left).attr("y", 20).text("Fri");
-      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.dayColor).attr("x", 11 * barWidth / 12 + margin.left).attr("y", 20).text("Sat");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", barWidth / 12 + margin.left).attr("y", 20).text("Mon");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", 3 * barWidth / 12 + margin.left).attr("y", 20).text("Tue");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", 5 * barWidth / 12 + margin.left).attr("y", 20).text("Wed");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", 7 * barWidth / 12 + margin.left).attr("y", 20).text("Thu");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", 9 * barWidth / 12 + margin.left).attr("y", 20).text("Fri");
+      svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", 11 * barWidth / 12 + margin.left).attr("y", 20).text("Sat");
       svg.append("g").attr("transform", `translate(${ margin.left },0)`).attr("opacity", 0.2).call(gridLines);
       const barGroups = svg.selectAll("g.barGroup").data(calendarEvents).join("g").attr("class", "barGroup");
-      barGroups.append("rect").attr("fill", d => d.background || barStyle.background).attr("stroke-width", "2px").attr("stroke", () => "#ccdfe3").attr("x", d => margin.left + barWidth / 6 * d.day + 1).attr("y", d => yScale(new Date(d.timeFrom)) + 1).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 2).attr("width", barWidth / 6 - 2);
+      barGroups.append("rect").attr("stroke-width", "2px").attr("x", d => margin.left + barWidth / 6 * d.day + 1).attr("y", d => yScale(new Date(d.timeFrom)) + 1).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 2).attr("width", barWidth / 6 - 2);
       // barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.textColor).attr("x", d => (1 + 2 * d.day) * barWidth / 12 + margin.left).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
-      barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").style("color", barStyle.textColor).html(d => `<div class="block__text"><p>${ d.title }</p><p>${ new Date(d.timeFrom).toLocaleTimeString("en-US", {
+      barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").html(d => `<div class="block__text"><p>${ d.title }</p><p>${ new Date(d.timeFrom).toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
@@ -502,11 +496,34 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
 
 html > body {
-  background: #f0f8fa;
+  background: var(--bgColorLv2);
   padding: 0;
-  min-height: 100vh;
   max-width: 960px;
   margin: 0 auto;
+  --starColor: #dbdb04;
+  --bgColorLv0: #020202;
+  --bgColorLv1: #010f1a;
+  --bgColorLv2: #011724;
+  --tagColor: #202536;
+  --expandableHoverColor: #022336;
+  --btnColor: #03283d;
+  --btnHoverColor: #083854;
+  --txtColor: #abc3d1;
+  transition: fill 0.5s, height 0.5s, color 0.5s, background-color 0.5s, stroke 0.5s, border-top-color 0.5s, border-right-color 0.5s, border-bottom-color 0.5s, border-left-color 0.5s, opacity 0.5s, transform 0.5s;
+}
+
+@media (prefers-color-scheme: light) {
+  html > body {
+    --starColor: #ff2;
+    --bgColorLv0: #fff;
+    --bgColorLv1: #fafeff;
+    --bgColorLv2: #f0f8fa;
+    --tagColor: #e9ecf2;
+    --expandableHoverColor: #e4eff2;
+    --btnColor: #daecf0;
+    --btnHoverColor: #ccdfe3;
+    --txtColor: #0e3945;
+  }
 }
 
 #d3-schedule {
@@ -542,25 +559,53 @@ svg p {
   text-align: center;
 }
 
-span {
-  transition: transform 0.5s;
+span, g {
+  color: var(--txtColor);
+  transition: color 0.5s, transform 0.5s;
+}
+
+text {
+  color: var(--txtColor);
+  fill: var(--txtColor);
+  transition: fill 0.5s, color 0.5s;
+}
+
+rect {
+  fill: var(--expandableHoverColor);
+  stroke: var(--btnHoverColor);
+  transition: fill 0.5s, stroke 0.5s;
 }
 
 h1 {
+  color: var(--txtColor);
+  transition: color 0.5s;
   margin: 22px 20px;
   font-size: 2em;
   font-weight: 700;
 }
 
 h2 {
+  color: var(--txtColor);
+  transition: color 0.5s;
   margin: 60px 20px;
   font-size: 1.5em;
   font-weight: 600;
 }
 
+p {
+  color: var(--txtColor);
+  transition: color 0.5s;
+}
+
 strong {
   font-size: 1.2em;
   font-weight: 600;
+}
+
+.star {
+  color: var(--starColor);
+  transition: color 0.5s;
+  text-shadow: 0 0 2px #3309;
 }
 
 .centered-text {
@@ -577,11 +622,12 @@ strong {
 .clickable {
   user-select: none;
   cursor: pointer;
-  transition: background-color 0.5s;
+  transition: color 0.5s, background-color 0.5s, transform 0.5s;
 }
 
 .expandable > .expandable__content {
-  background: #fafeff;
+  background: var(--bgColorLv1);
+  transition: height 0.5s, color 0.5s, background-color 0.5s, border-top-color 0.5s, border-right-color 0.5s, border-bottom-color 0.5s, border-left-color 0.5s, opacity 0.5s;
 }
 
 .expandable .expandable-header__button {
@@ -589,7 +635,7 @@ strong {
 }
 
 .expandable .expandable-header__button:not(.disabled):hover {
-  background: #e4eff2;
+  background: var(--expandableHoverColor);
 }
 
 .expandable .clickable.disabled {
@@ -633,6 +679,8 @@ form > p {
 }
 
 label {
+  color: var(--txtColor);
+  transition: color 0.5s;
   font-size: 1em;
 }
 
@@ -645,28 +693,37 @@ input[type=text] {
   -webkit-border-radius: 0;
   box-sizing: border-box;
   width: min(800px, calc(100% - 40px));
-  border: solid #bfd5db 2px;
+  border: 2px solid var(--btnHoverColor);
   padding: 10px 0;
   border-radius: 10px;
   font-size: 1.4em;
+  background-color: var(--bgColorLv0);
+  color: var(--txtColor);
+  transition: color 0.5s, background-color 0.5s, border-top-color 0.5s, border-right-color 0.5s, border-bottom-color 0.5s, border-left-color 0.5s;
+}
+
+input[type=text]::placeholder {
+  opacity: 0.5;
+  color: var(--txtColor);
+  transition: color 0.5s;
 }
 
 input[type=submit] {
   -webkit-appearance: none;
   -webkit-border-radius: 0;
-  color: #0e3945;
-  background: #daecf0;
+  color: var(--txtColor);
+  background: var(--btnColor);
   cursor: pointer;
   border: none;
   border-radius: 10px;
   padding: 12px 25px;
   font-size: 0.9em;
   font-weight: 600;
-  transition: background-color 0.5s;
+  transition: color 0.5s, background-color 0.5s;
 }
 
-input[type=submit]:not(:disabled):hover {
-  background: #ccdfe3;
+input[type=submit]:not(:disabled):hover, input[type=submit]:not(:disabled):focus {
+  background: var(--btnHoverColor);
 }
 
 input[type=submit]:disabled {
@@ -686,15 +743,19 @@ li {
   font-size: 1em;
   margin: 8px;
   padding: 5px 10px;
-  background: #e9f1f2;
+  background: var(--tagColor);
   border-radius: 8px;
   justify-content: center;
-  align-items: center
+  align-items: center;
+  color: var(--txtColor);
+  transition: color 0.5s, background-color 0.5s;
 }
 
 footer {
+  color: var(--txtColor);
   font-weight: 600;
-  margin: 20px;
+  margin: 20px 20px calc(20px + env(safe-area-inset-bottom, 0)) 20px;
+  transition: color 0.5s;
 }
 
 #app {
@@ -702,7 +763,6 @@ footer {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  color: #0e3945;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
