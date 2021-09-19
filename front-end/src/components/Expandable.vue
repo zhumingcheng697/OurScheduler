@@ -46,7 +46,7 @@ export default {
           } else {
             this.$el.classList.remove("expanded");
           }
-        }, 10);
+        }, 5);
       }
     }
   }
@@ -56,14 +56,16 @@ export default {
 <style>
 .expandable > .expandable__content {
   overflow: hidden;
-  transition: height 0.5s;
+  transition: height 0.5s, opacity 0.5s;
 }
 
 .expandable.expanded.animating > .expandable__content {
   height: var(--content-height);
+  opacity: 1;
 }
 
 .expandable:not(.expanded) > .expandable__content {
-  height: 0px;
+  height: 0;
+  opacity: 0;
 }
 </style>
