@@ -9,12 +9,14 @@
   </div>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue';
+
+export default Vue.extend({
   name: "Expandable",
   data() {
     return {
-      contentHeight: "0px"
+      contentHeight: "0px" as string
     };
   },
   props: {
@@ -22,21 +24,21 @@ export default {
     expanded: Boolean
   },
   watch: {
-    expanded(toBeExpanded) {
+    expanded(toBeExpanded: boolean): void {
       this.handleExpand(toBeExpanded);
     }
   },
-  mounted() {
+  mounted(): void {
     this.handleExpand(this.expanded);
 
-    this.$refs.expandable__content.addEventListener("transitionend", () => {
+    (this.$refs.expandable__content as Element).addEventListener("transitionend", () => {
       this.$el.classList.remove("animating");
     });
   },
   methods: {
-    handleExpand(toBeExpanded) {
+    handleExpand(toBeExpanded: boolean): void {
       if (this.$el.classList.contains("expanded") !== toBeExpanded) {
-        this.contentHeight = this.$refs.expandable__content.scrollHeight + "px";
+        this.contentHeight = (this.$refs.expandable__content as Element).scrollHeight + "px";
 
         this.$el.classList.add("animating");
 
@@ -50,7 +52,7 @@ export default {
       }
     }
   }
-};
+});
 </script>
 
 <style>
