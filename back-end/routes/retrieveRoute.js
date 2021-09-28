@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const retrieveClass = require("../retrieve");
+const retrieveClass = require("../util/database/retrieve");
 
 router.get("/:school/:target", (req, res) => {
     const school = req.params.school;
@@ -11,8 +11,8 @@ router.get("/:school/:target", (req, res) => {
         if (info) {
             return res.send(info);
         } else {
-            const scrapeClass = require("../getClassInfo");
-            const insert = require("../insert");
+            const scrapeClass = require("../util/scraper/getClassInfo");
+            const insert = require("../util/database/insert");
 
             scrapeClass(school, target, req.query && req.query.dev === "true").then(async (info) => {
                 await insert(school, info);

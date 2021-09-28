@@ -82,10 +82,10 @@ async function main(packageIn) {
             this.start = start;
             this.end = end;
             this.log = () => {
-                console.log(this.name);
-                console.log(this.id);
-                console.log(this.start);
-                console.log(this.end);
+                // console.log(this.name);
+                // console.log(this.id);
+                // console.log(this.start);
+                // console.log(this.end);
             }
         }
 
@@ -120,12 +120,12 @@ async function main(packageIn) {
             }
             this.print = () => {
                 for (const ts of this.timeslots) {
-                    ts.log();
+                    // ts.log();
                 }
             }
             this.printCourses = () => {
                 for (const ts of this.timeslots) {
-                    console.log(ts.id);
+                    // console.log(ts.id);
                 }
             }
         }
@@ -219,9 +219,9 @@ async function main(packageIn) {
         } else {
 
             for (const s of schedules) {
-                console.log('===============');
-                s.printCourses();
-                console.log('===============');
+                // console.log('===============');
+                // s.printCourses();
+                // console.log('===============');
                 let _schedule = [];
                 let slots = s.timeslots;
                 for (const _slot of slots) {

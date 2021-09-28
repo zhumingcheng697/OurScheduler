@@ -2,7 +2,7 @@ async function main(packageIn) {
     let _package = packageIn;
     let data = [];
     for (let _class of _package.classList) {
-        data.push(await require("./retrieve")(_class[0], _class[1]));
+        data.push(await require("./database/retrieve")(_class[0], _class[1]));
     }
 
     let locked = new Set(_package.locked);

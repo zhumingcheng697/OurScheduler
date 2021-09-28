@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const searchSchool = require("../getSchoolId");
+const searchSchool = require("../util/scraper/getSchoolId");
 
 router.get("/:target", (req, res) => {
     const target = req.params.target;
