@@ -22,7 +22,7 @@ Our features include:
 
 ## How we built it
 
-We used Vue.js for the front end, Node.js and express.js for the back end, and MongoDB for the database. We also utilized tools such as Puppeteer for web scraping and d3.js for visualizing the schedule generations.
+We used Vue.js and TypeScript for the front end, Node.js and express.js for the back end, and MongoDB for the database. We also utilized tools such as Puppeteer for web scraping and D3.js for visualizing the schedules.
 
 ## Challenges & accomplishments
 
@@ -38,4 +38,4 @@ We envisioned quite a few future updates for OurScheduler: having it be able to 
 
 ## Built With
 
-HTML, CSS, JavaScript, d3.js, Vue.js, Node.js, express.js, axios, Puppeteer, MongoDB, netlify, heroku
+HTML, CSS, JavaScript, TypeScript, D3.js, Vue.js, Node.js, express.js, axios, Puppeteer, MongoDB, netlify, heroku
