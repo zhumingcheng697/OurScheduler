@@ -16,8 +16,10 @@ async function main(packageIn) {
         let _package = packageIn;
         let data = [];
         for (let _class of _package.classList) {
-            data.push(await require("./retrieve")(_class[0], _class[1]));
+            data.push(await require("./database/retrieve")(_class[0], _class[1]));
         }
+        // let data = JSON.parse(`[{"_id":"613e977f75ef6b7bc97f909d","name":"AUDIO FOUNDATION STUDIO","credits":3,"label":"DMUY 1113","lectures":[["-B",[480,590],[3360,3470]],["-A",[1920,2030],[4800,4910]]],"extras":[]},{"_id":"613d9e47d4d8936051754fb5","name":"CREATIVE CODING","credits":3,"label":"DMUY 1133","lectures":[["-A",[1080,1190],[3960,4070]],["-C",[1920,2030],[4800,4910]],["-D",[2400,2510],[5280,5390]],["-E",[840,950],[3720,3830]],["-INET",[2040,2150],[4920,5030]]],"extras":[]},{"_id":"613e3add70dfe74969f610f6","name":"IDEATION & PROTOTYPING","credits":3,"label":"DMUY 1143","lectures":[["-A",[960,1070],[3840,3950]],["-B",[960,1070],[3840,3950]],["-C",[960,1070],[3840,3950]],["-D",[480,590],[3360,3470]],["-E",[2040,2150],[4920,5030]]],"extras":[]},{"_id":"613dcbb988c1819b858ba2e5","name":"PROBLEM SOLVING AND PROGRAMMING I","credits":3,"label":"CSUY 1113","lectures":[["-ALEC",[570,650],[3450,3530]],["-BLEC",[840,920],[3720,3800]]],"extras":[["-LB1",[6240,6320]],["-LB2",[6330,6410]],["-LB3",[6600,6680]],["-LB4",[6330,6410]]]},{"_id":"613e0c0f1a3ec43391efba6c","name":"BIG DATA","credits":3,"label":"CSGY 6513","lectures":[["-A",[840,990]]],"extras":[]},{"_id":"613d9ed980b163a2d74dac0a","name":"INFORMATION VISUALIZATION","credits":3,"label":"CSGY 6313","lectures":[["-A",[2280,2430]],["-B",[3720,3870]]],"extras":[]},{"_id":"613dd50e488737d2f19d95df","name":"COMPUTER NETWORKING","credits":3,"label":"CSUY 4793","lectures":[["-A",[7860,8010]]],"extras":[]},{"_id":"613d9f1e56d1406ce5c7850e","name":"COMPUTER ARCHITECTURE AND ORGANIZATION","credits":4,"label":"CSUY 2214","lectures":[["-ALEC",[600,710],[3480,3590]],["-CLEC",[480,590],[3360,3470]]],"extras":[["-REC1",[6240,6350]],["-REC2",[6360,6470]],["-REC3",[7200,6590]],["-REC4",[7200,6590]]]}]`);
+        // let time = Date.now();
         let locked = _package.locked;
         let restrictions = _package.restrictions;
 
@@ -217,7 +219,6 @@ async function main(packageIn) {
         if (schedules.length == 0) {
             console.log("No schedule can be generated for the given courses (conflict exists for all options).");
         } else {
-
             for (const s of schedules) {
                 // console.log('===============');
                 // s.printCourses();
@@ -231,7 +232,7 @@ async function main(packageIn) {
             }
         }
 
-        console.log(_export);
+        // return [_export, Date.now() - time];
         return _export;
     // }
 }
