@@ -73,7 +73,7 @@ async function solve(page) {
                 }
             });
 
-            if (undefined == response.data.text) {
+            if (!response.data.text) {
                 const reloadButton = await imageFrame.$("#recaptcha-reload-button");
                 await reloadButton.click({ delay: rdn(30, 150) });
                 continue;
@@ -98,7 +98,6 @@ async function solve(page) {
                 return page.evaluate(() => document.getElementById("g-recaptcha-response").value);
             } catch (e) {
                 console.error(e);
-                continue;
             }
         }
     } catch (e) {

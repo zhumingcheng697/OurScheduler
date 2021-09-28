@@ -8,23 +8,23 @@ async function dbInsert(schoolInfo, classInfo) {
     const extras = [];
     const scraped = classInfo;
     for (let i = 0; i < scraped.length; i++) {
-        var time_arr = scraped[i][4].split("-");
+        const time_arr = scraped[i][4].split("-");
 
-        var start_time_nums = time_arr[0].slice(0, -2).split(":");
-        var start_time = parseInt(start_time_nums[0]) * 60 + parseInt(start_time_nums[1]);
-        var start_time_ampm = time_arr[0].slice(-2);
-        if (start_time_ampm == "pm" && start_time_nums[0] != 12) {
+        const start_time_nums = time_arr[0].slice(0, -2).split(":");
+        let start_time = parseInt(start_time_nums[0]) * 60 + parseInt(start_time_nums[1]);
+        const start_time_ampm = time_arr[0].slice(-2);
+        if (start_time_ampm === "pm" && start_time_nums[0] != 12) {
             start_time += 720;
         }
 
-        var end_time_nums = time_arr[1].slice(0, -2).split(":");
-        var end_time = parseInt(end_time_nums[0]) * 60 + parseInt(end_time_nums[1]);
-        var end_time_ampm = time_arr[1].slice(-2);
-        if (end_time_ampm == "pm" && end_time_nums[0] != 12) {
+        const end_time_nums = time_arr[1].slice(0, -2).split(":");
+        let end_time = parseInt(end_time_nums[0]) * 60 + parseInt(end_time_nums[1]);
+        const end_time_ampm = time_arr[1].slice(-2);
+        if (end_time_ampm === "pm" && end_time_nums[0] != 12) {
             end_time += 720;
         }
 
-        var temp = [scraped[i][2]];
+        const temp = [scraped[i][2]];
         for (let j = 0; j < scraped[i][3].length; j++) {
             temp.push([start_time + scraped[i][3][j] * 1440, end_time + scraped[i][3][j] * 1440]);
         }

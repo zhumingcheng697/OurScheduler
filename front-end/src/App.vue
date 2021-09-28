@@ -180,7 +180,7 @@ export default Vue.extend({
   },
   computed: {
     allowAddClass(): boolean {
-      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase() || e.label === this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase());
+      return !!this.classTemp && !this.classesSet.find((e) => e.name === this.classTemp.trim().toUpperCase() || e.label === this.classTemp.trim().toUpperCase());
     },
     isClassAmountValid(): boolean {
       return /^(?:1[0-9]|[1-9])(?:-(?:1[0-9]|[1-9]))?$/.test(this.classAmountTemp);
@@ -274,7 +274,7 @@ export default Vue.extend({
       this.loading = true;
 
       const school = this.schoolId.toLowerCase();
-      const target = this.classTemp.replace(/^\s+|\s+$/g, "").toUpperCase();
+      const target = this.classTemp.trim().toUpperCase();
       try {
         axios.get(`https://ourscheduler.herokuapp.com/retrieve/${ school }/${ target }`).then(({ data }) => {
           if (data) {
