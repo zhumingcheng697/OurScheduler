@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 4000;
 
+require('dotenv').config();
+
 const generatorRoute = require("./routes/generatorRoute");
 const retrieveRoute = require("./routes/retrieveRoute");
 const searchRoute = require("./routes/searchRoute");

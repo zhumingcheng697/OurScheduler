@@ -1,7 +1,7 @@
 async function dbInsert(schoolInfo, classInfo) {
     const { MongoClient } = require("mongodb");
-    const url = "mongodb+srv://admin:hackersunion@myscheduler.wcsib.mongodb.net/Myscheduler_classes?retryWrites=true&w=majority";
-    const client = new MongoClient(url);
+    const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     const dbName = "Classes";
     const school = schoolInfo;
     const lectures = [];
@@ -46,7 +46,8 @@ async function dbInsert(schoolInfo, classInfo) {
                 "credits": scraped[0][5], //scrape credits
                 "label": scraped[0][1], //class id until '-'
                 "lectures": lectures, //lecture sections
-                "extras": extras //extra sections
+                "extras": extras, //extra sections
+                "lastCached": new Date()
             };
             const p = await col.insertOne(classDocument);
             //const myDoc = await col.findOne();

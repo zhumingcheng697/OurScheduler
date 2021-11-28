@@ -1,7 +1,7 @@
 async function dbRetrieve(schoolInfo, classInfo) {
     const { MongoClient } = require("mongodb");
-    const url = "mongodb+srv://admin:hackersunion@myscheduler.wcsib.mongodb.net/Myscheduler_classes?retryWrites=true&w=majority";
-    const client = new MongoClient(url);
+    const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
+    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     const dbName = "Classes";
     const school = schoolInfo;
 
