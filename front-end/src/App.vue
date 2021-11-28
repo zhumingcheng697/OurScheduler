@@ -117,6 +117,16 @@ interface ClassData {
   label: string
 }
 
+const keepAlive: (() => void) = (() => {
+  let timeoutId: number;
+
+  return function ping(): void {
+    clearTimeout(timeoutId);
+    axios.get(`https://ourscheduler.herokuapp.com/keep-alive`);
+    timeoutId = setTimeout(ping, 3 * 60 * 1000);
+  }
+})();
+
 type ScheduleData = [string, [number, number]][];
 
 type NumberRange = [number, number];
@@ -172,6 +182,7 @@ export default Vue.extend({
     }
   },
   mounted(): void {
+    keepAlive();
     this.expand("university");
     // this.expand("schedules");
     // this.runD3([["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]]);
