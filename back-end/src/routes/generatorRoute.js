@@ -7,9 +7,11 @@ router.get("/", (req, res) => {
     const prop = JSON.parse(decodeURI(req.query.prop));
 
     generator(prop).then((info) => {
-        return res.send(info);
+        res.send(info);
+    }, (e) => {
+        res.send(req.query && req.query.dev === "true" ? e : null);
     }).catch((e) => {
-        return res.send(req.query && req.query.dev === "true" ? e : null);
+        res.send(req.query && req.query.dev === "true" ? e : null);
     });
 });
 

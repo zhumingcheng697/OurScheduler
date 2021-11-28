@@ -4,6 +4,7 @@ const port = process.env.PORT || 4000;
 
 require('dotenv').config();
 
+const ackRoute = require("./routes/ackRoute");
 const generatorRoute = require("./routes/generatorRoute");
 const retrieveRoute = require("./routes/retrieveRoute");
 const searchRoute = require("./routes/searchRoute");
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use("/keep-alive", ackRoute);
 app.use("/generate", generatorRoute);
 app.use("/retrieve", retrieveRoute);
 app.use("/search", searchRoute);

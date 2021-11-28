@@ -7,9 +7,11 @@ router.get("/:target", (req, res) => {
     const target = req.params.target;
 
     searchSchool(target, req.query && req.query.dev === "true").then((id) => {
-        return res.send(id);
+        res.send(id);
+    }, (e) => {
+        res.send(req.query && req.query.dev === "true" ? e : null);
     }).catch((e) => {
-        return res.send(req.query && req.query.dev === "true" ? e : null);
+        res.send(req.query && req.query.dev === "true" ? e : null);
     });
 });
 
