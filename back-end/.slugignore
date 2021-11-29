@@ -1,13 +1,11 @@
 .DS_Store
-*/node_modules
-/front-end/dist
-/back-end/dist
-
+node_modules
+src
+*.ts
 
 # local env files
 .env.local
 .env.*.local
-.env
 
 # Log files
 npm-debug.log*
@@ -23,6 +21,3 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
-# Local Netlify folder
-.netlify
