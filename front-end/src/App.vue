@@ -117,14 +117,16 @@ interface ClassData {
   label: string
 }
 
+const backendUrl = "https://ourscheduler.herokuapp.com";
+
 const keepAlive: (() => void) = (() => {
   let timeoutId: number;
 
   return function ping(): void {
     clearTimeout(timeoutId);
-    axios.get(`https://ourscheduler.herokuapp.com/keep-alive`);
+    axios.get(`${ backendUrl }/keep-alive`);
     timeoutId = setTimeout(ping, 3 * 60 * 1000);
-  }
+  };
 })();
 
 type ScheduleData = [string, [number, number]][];
@@ -259,7 +261,7 @@ export default Vue.extend({
 
         const target = this.schoolNameTemp;
 
-        axios.get(`https://ourscheduler.herokuapp.com/search/${ target }`).then(({ data }) => {
+        axios.get(`${ backendUrl }/search/${ target }`).then(({ data }) => {
           if (typeof data === "string") {
             this.schoolId = data.toUpperCase();
             this.expand("classes");
@@ -287,7 +289,7 @@ export default Vue.extend({
       const school = this.schoolId.toLowerCase();
       const target = this.classTemp.trim().toUpperCase();
       try {
-        axios.get(`https://ourscheduler.herokuapp.com/retrieve/${ school }/${ target }`).then(({ data }) => {
+        axios.get(`${ backendUrl }/retrieve/${ school }/${ target }`).then(({ data }) => {
           if (data) {
             this.classTemp = "";
 
@@ -408,7 +410,7 @@ export default Vue.extend({
       this.generatedSchedules = null;
 
       try {
-        axios.get(`https://ourscheduler.herokuapp.com/generate/?prop=${ encodeURI(JSON.stringify(prop)) }`).then(({ data }) => {
+        axios.get(`${ backendUrl }/generate/?prop=${ encodeURI(JSON.stringify(prop)) }`).then(({ data }) => {
           this.runD3(data[0]);
           this.currentScheduleIndex = 0;
           this.noShuffle = data.length < 2;
