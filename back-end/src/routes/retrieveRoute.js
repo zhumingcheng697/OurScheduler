@@ -17,8 +17,8 @@ router.get("/:school/:target", (req, res) => {
 
             scrapeClass(school, target, req.query && req.query.dev === "true").then(async (info) => {
                 await insert(school, info);
-                const newInfo = await retrieveClass(school, target, req.query && req.query.dev === "true");
                 if (!info) {
+                    const newInfo = await retrieveClass(school, target, req.query && req.query.dev === "true");
                     res.send(newInfo);
                 }
             }, (e) => {

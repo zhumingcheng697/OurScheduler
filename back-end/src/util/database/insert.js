@@ -1,9 +1,6 @@
 async function dbInsert(schoolInfo, classInfo) {
-    const { MongoClient } = require("mongodb");
-    const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+    const client = await require("./dbHelper");
     const dbName = "Classes";
-    const school = schoolInfo;
     const lectures = [];
     const extras = [];
     const scraped = classInfo;
@@ -35,31 +32,22 @@ async function dbInsert(schoolInfo, classInfo) {
         }
     }
 
-    async function run() {
-        try {
-            await client.connect();
-            //console.log("Connected correctly to server");
-            const db = client.db(dbName);
-            const col = db.collection(school);
-            let classDocument = {
-                "name": scraped[0][0], //course name as given
-                "credits": scraped[0][5], //scrape credits
-                "label": scraped[0][1], //class id until '-'
-                "lectures": lectures, //lecture sections
-                "extras": extras, //extra sections
-                "lastCached": new Date()
-            };
-            const p = await col.insertOne(classDocument);
-            //const myDoc = await col.findOne();
-            //console.log(myDoc);
-        } catch (err) {
-            console.log(err.stack);
-        } finally {
-            await client.close();
-        }
+    try {
+        const db = client.db(dbName);
+        const col = db.collection(schoolInfo);
+        let classDocument = {
+            "name": scraped[0][0], //course name as given
+            "credits": scraped[0][5], //scrape credits
+            "label": scraped[0][1], //class id until '-'
+            "lectures": lectures, //lecture sections
+            "extras": extras, //extra sections
+            "lastCached": new Date()
+        };
+        let query = { "name": scraped[0][0], "label": scraped[0][1] };
+        await col.updateOne(query, { $set: classDocument }, { upsert: true });
+    } catch (e) {
+        console.error(e);
     }
-
-    await run();
 }
 
 module.exports = dbInsert;

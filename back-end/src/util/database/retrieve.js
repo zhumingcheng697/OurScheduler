@@ -1,23 +1,15 @@
 async function dbRetrieve(schoolInfo, classInfo) {
-    const { MongoClient } = require("mongodb");
-    const url = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_URL}/${process.env.DB_NAME}?retryWrites=true&w=majority`;
-    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+    const client = await require("./dbHelper");
     const dbName = "Classes";
-    const school = schoolInfo;
 
-    async function run() {
-        try {
-            await client.connect();
-            const db = client.db(dbName);
-            const col = db.collection(school);
-            const query = { $or: [{ name: classInfo }, { label: classInfo }] };
-            return await col.findOne(query);
-        } finally {
-            await client.close();
-        }
+    try {
+        const db = client.db(dbName);
+        const col = db.collection(schoolInfo);
+        const query = { $or: [{ name: classInfo.toUpperCase() }, { label: classInfo.toUpperCase() }] };
+        return await col.findOne(query);
+    } catch (e) {
+        console.error(e);
     }
-
-    return await run();
 }
 
 module.exports = dbRetrieve;
