@@ -3,7 +3,7 @@
     <div class="expandable__header">
       <slot name="header" :id="id" :expanded="expanded"/>
     </div>
-    <div class="expandable__content" ref="expandable__content">
+    <div class="expandable__content" ref="expandable__content" :aria-hidden="!expanded">
       <slot name="content" :id="id" :expanded="expanded"/>
     </div>
   </div>

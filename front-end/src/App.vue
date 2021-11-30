@@ -5,34 +5,34 @@
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
       <Expandable :id="'university'" :expanded="'university' === expandedSection">
         <template #header="{id, expanded}">
-          <div class="expandable-header__button clickable" @click="toggle(id)">
-            <p :style="{ marginRight: '10px'}"><strong>Which university or college do you attend?</strong></p>
+          <button type="button" class="expandable-header__button clickable" @click="toggle(id)">
+            <span><strong>Which university or college do you attend?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
-          </div>
+          </button>
         </template>
-        <template #content>
+        <template #content="{expanded}">
           <form @submit.prevent="setSchoolUrl">
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization">
-            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading">
+            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
       </Expandable>
       <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId}]" @click="schoolId && toggle(id)">
-            <p :style="{ marginRight: '10px'}"><strong>Which classes do you plan to take?</strong></p>
+          <button type="button" class="expandable-header__button clickable" :disabled="!schoolId" @click="toggle(id)">
+            <span><strong>Which classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
-          </div>
+          </button>
         </template>
-        <template #content>
+        <template #content="{expanded}">
           <form @submit.prevent="addClass">
             <label for="class-code">Class Name or Class Code</label>
-            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off">
-            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading">
+            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
             <ul v-if="classesSet.length">
-              <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
+              <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName">
+                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
               </li>
             </ul>
@@ -42,59 +42,71 @@
       </Expandable>
       <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId}]" @click="schoolId && toggle(id)">
-            <p :style="{ marginRight: '10px'}"><strong>How many credits or classes do you plan to take?</strong></p>
+          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId">
+            <span><strong>How many credits or classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
-          </div>
+          </button>
         </template>
-        <template #content>
+        <template #content="{expanded}">
           <form @submit.prevent="setClassCredit">
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off">
+            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <label for="credit-amount">Number of Credits</label>
-            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off">
-            <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid">
+            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid" :tabindex="expanded ? 0 : -1">
             <label>You have selected {{ classesSet.length }} class{{ classesSet.length === 1 ? "" : "es" }} worth of {{ creditSum }} credit{{ creditSum === 1 ? "" : "s" }} so far.</label>
           </form>
         </template>
       </Expandable>
       <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && toggle(id)">
-            <p :style="{ marginRight: '10px'}"><strong>Summary</strong></p>
+          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
+            <span><strong>Summary</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
-          </div>
+          </button>
         </template>
-        <template #content>
+        <template #content="{expanded}">
           <form @submit.prevent="generateSchedule">
-            <p class="clickable" @click="expand('university')">
+            <p class="clickable" @click="expand('university')" :tabindex="expanded ? 0 : -1">
               <strong>{{ schoolId }}</strong></p>
-            <p class="clickable" @click="expand('amount')">
+            <p class="clickable" @click="expand('amount')" :tabindex="expanded ? 0 : -1">
               <span v-if="classAmountSet">{{ classAmountFormattedLong(true) }}</span>
               <span v-if="classAmountSet && creditAmountSet">, </span>
               <span v-if="creditAmountSet">{{ creditAmountFormattedLong(true) }}</span>
             </p>
-            <ul v-if="classesSet.length" class="clickable" @click="expand('classes')">
-              <li v-for="(addedClass, index) in classesSet" :key="addedClass.name">
-                <span :style="{ marginRight: '5px'}" class=""><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
+            <ul v-if="classesSet.length" class="clickable" @click="expand('classes')" :tabindex="expanded ? 0 : -1">
+              <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName">
+                <span :style="{ marginRight: '5px'}"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}
               </li>
             </ul>
-            <input class="centered-text" type="submit" value="Generate Schedule" :disabled="loading">
+            <input class="centered-text" type="submit" value="Generate Schedule" :disabled="loading" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <div :class="['expandable-header__button', 'clickable', {disabled: !schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || typeof currentScheduleIndex !== 'number'}]" @click="schoolId && classesSet.length && (classAmountSet || creditAmountSet) && generatedSchedules && typeof currentScheduleIndex === 'number' && toggle(id)">
-            <p :style="{ marginRight: '10px'}"><strong>Schedules</strong></p>
+          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
+            <span><strong>Schedules</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
-          </div>
+          </button>
         </template>
-        <template #content>
+        <template #content="{expanded}">
           <div id="d3-schedule" ref="d3-schedule"></div>
-          <form @submit.prevent="swapSchedule">
-            <input class="centered-text" type="submit" value="Shuffle" :disabled="noShuffle">
+          <form v-if="currentScheduleIndex !== null && generatedSchedules !== null" @submit.prevent="swapSchedule">
+            <p>
+              <strong>{{ schoolId }}</strong></p>
+            <p>
+              <span>{{ currentScheduleClassAmountFormatted }}</span>
+              <span>, </span>
+              <span>{{ currentScheduleCreditAmountFormatted }}</span>
+            </p>
+            <ul>
+              <li v-for="addedClass in classesSet.filter(e => currentScheduleClasses.has(e.name))" :key="addedClass.displayName">
+                {{ addedClass.displayName }}
+              </li>
+            </ul>
+            <input class="centered-text" type="submit" value="Shuffle" :disabled="noShuffle" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
       </Expandable>
@@ -117,6 +129,11 @@ interface ClassData {
   label: string
 }
 
+type SectionId = "" | "university" | "classes" | "amount" | "summary" | "schedules"
+type ScheduleDatum = [string, [number, number]];
+type ScheduleData = ScheduleDatum[];
+type NumberRange = [number, number];
+
 const backendUrl = "https://ourscheduler.herokuapp.com";
 
 const keepAlive: (() => void) = (() => {
@@ -129,17 +146,13 @@ const keepAlive: (() => void) = (() => {
   };
 })();
 
-type ScheduleData = [string, [number, number]][];
-
-type NumberRange = [number, number];
-
 export default Vue.extend({
   name: "App",
   data() {
     return {
       loading: false as boolean,
       projectName: "OurScheduler" as string,
-      expandedSection: "" as string,
+      expandedSection: "" as SectionId,
       schoolNameTemp: "" as string,
       classTemp: "" as string,
       classesSet: [] as ClassData[],
@@ -221,13 +234,27 @@ export default Vue.extend({
     },
     lockedCreditSum(): number {
       return d3.sum(this.classesSet.filter((el: ClassData) => el.locked), (el: ClassData) => el.credits);
-    }
+    },
+    currentScheduleClasses(): Set<string> {
+      if (this.generatedSchedules === null || this.currentScheduleIndex === null) { return new Set<string>(); }
+      return new Set<string>(this.generatedSchedules[this.currentScheduleIndex].map((el: ScheduleDatum) => el[0]));
+    },
+    currentScheduleCreditSum(): number {
+      return d3.sum(this.classesSet.filter((el: ClassData) => this.currentScheduleClasses.has(el.name)), (el: ClassData) => el.credits);
+    },
+    currentScheduleClassAmountFormatted(): string {
+      const classAmount = this.currentScheduleClasses.size;
+      return classAmount + " Class" + (classAmount === 1 ? "" : "es");
+    },
+    currentScheduleCreditAmountFormatted(): string {
+      return this.currentScheduleCreditSum + " Credit" + (this.currentScheduleCreditSum === 1 ? "" : "es");
+    },
   },
   components: {
     Expandable
   },
   methods: {
-    expand(id: string): void {
+    expand(id: SectionId): void {
       setTimeout(() => {
         this.expandedSection = id;
       }, 5);
@@ -237,7 +264,7 @@ export default Vue.extend({
         this.expandedSection = "";
       }, 5);
     },
-    toggle(id: string): void {
+    toggle(id: SectionId): void {
       setTimeout(() => {
         this.expandedSection = (this.expandedSection === id) ? "" : id;
       }, 5);
@@ -502,7 +529,7 @@ export default Vue.extend({
       // This part ^ always goes at the end of our index.js
     },
     swapSchedule(): void {
-      if (this.noShuffle || !this.generatedSchedules || typeof this.currentScheduleIndex !== "number") { return; }
+      if (this.noShuffle || !this.generatedSchedules || this.currentScheduleIndex === null) { return; }
 
       let currStr: string = "";
       let nextStr: string = JSON.stringify(this.generatedSchedules[this.currentScheduleIndex]);
@@ -567,6 +594,16 @@ html > body {
   margin: 0 20px;
 }
 
+button[type=button] {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  border: inherit;
+  background: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  color: inherit;
+}
+
 svg body {
   margin: 0;
   padding: 0;
@@ -591,11 +628,6 @@ svg p {
   text-align: center;
 }
 
-span, g {
-  color: var(--txtColor);
-  transition: color 0.5s, transform 0.5s;
-}
-
 text {
   color: var(--txtColor);
   fill: var(--txtColor);
@@ -608,25 +640,21 @@ rect {
   transition: fill 0.5s, stroke 0.5s;
 }
 
-h1 {
+h1, h2, span, p, g {
   color: var(--txtColor);
   transition: color 0.5s;
+}
+
+h1 {
   margin: 22px 20px;
   font-size: 2em;
   font-weight: 700;
 }
 
 h2 {
-  color: var(--txtColor);
-  transition: color 0.5s;
   margin: 60px 20px;
   font-size: 1.5em;
   font-weight: 600;
-}
-
-p {
-  color: var(--txtColor);
-  transition: color 0.5s;
 }
 
 strong {
@@ -645,10 +673,19 @@ strong {
 }
 
 .expandable-header__button {
+  width: 100%;
   padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.expandable-header__button span:first-child {
+  margin: 1em 10px 1em 0;
+}
+
+.expandable-header__button span:last-child {
+  transition: color 0.5s, transform 0.5s;
 }
 
 .clickable {
@@ -666,15 +703,16 @@ strong {
   transition: background-color 0.5s;
 }
 
-.expandable .expandable-header__button:not(.disabled):hover {
+.expandable .expandable-header__button:not(:disabled):hover,
+.expandable .expandable-header__button:not(:disabled):focus {
   background: var(--expandableHoverColor);
 }
 
-.expandable .clickable.disabled {
+.expandable .clickable:disabled {
   opacity: 0.5;
 }
 
-.clickable.disabled {
+.clickable:disabled {
   cursor: not-allowed;
 }
 
