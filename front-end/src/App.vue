@@ -461,12 +461,15 @@ export default Vue.extend({
       const svg = d3.create("svg").attr("width", width).attr("height", height);
       // All further code additions will go just below this line
       const yScale = d3.scaleTime().domain([new Date(Math.max(START_TIME, minDateValue - 1 / 3 * 60 * 60 * 1000)), new Date(Math.min(END_TIME, maxDateValue + 1 / 3 * 60 * 60 * 1000))]).range([margin.top, height - margin.bottom]);
-      const yAxis = d3.axisLeft(yScale).ticks(hours);
+      const yAxis = d3.axisLeft<Date>(yScale).ticks(hours).tickFormat((d: Date) => d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        hour12: true
+      }));
       const xAxis = d3.axisTop(d3.scaleLinear().domain([0, 6]).range([margin.left, width - margin.right])).ticks(6).tickSize(height - margin.bottom - margin.top).tickFormat(() => "");
 
-      svg.append("g").attr("transform", `translate(${ margin.left },0)`).attr("opacity", 0.7).call(yAxis).call(g => g.select(".domain").remove()).call(g => g.selectAll("g.tick").filter((d: Date | any) => d.getMinutes() === 0 && d.getHours() === 0).select("text").text("12 AM"));
+      svg.append("g").attr("transform", `translate(${ margin.left },0)`).call(yAxis).call(g => g.select(".domain").remove());
 
-      svg.append("g").attr("transform", `translate(0,${ height - margin.bottom })`).attr("opacity", 0.2).call(xAxis).call(g => g.select(".domain").remove()).call(g => g.selectAll(".tick").filter(d => d === 0).remove());
+      svg.append("g").attr("transform", `translate(0,${ height - margin.bottom })`).attr("opacity", 0.3).call(xAxis).call(g => g.select(".domain").remove()).call(g => g.selectAll(".tick").filter(d => d === 0).remove());
 
       const gridLines = d3.axisRight(yScale).ticks(hours * 4).tickSize(barWidth).tickFormat(() => ""); // even though they're "ticks" we've set them to be full-width
       svg.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 20).attr("font-weight", 500).attr("text-anchor", "middle").attr("x", barWidth / 12 + margin.left).attr("y", 20).text("Mon");
@@ -481,11 +484,11 @@ export default Vue.extend({
       // barGroups.append("text").attr("font-family", "'Open Sans', sans-serif").attr("font-size", 8).attr("font-weight", 500).attr("text-anchor", "middle").attr("fill", barStyle.textColor).attr("x", d => (1 + 2 * d.day) * barWidth / 12 + margin.left).attr("y", d => yScale(new Date(d.timeFrom)) + 20).text(d => d.title);
 
       barGroups.append("foreignObject").attr("x", d => margin.left + barWidth / 6 * d.day + 2).attr("y", d => yScale(new Date(d.timeFrom)) + 2).attr("width", barWidth / 6 - 4).attr("height", d => yScale(new Date(d.timeTo)) - yScale(new Date(d.timeFrom)) - 4).append("xhtml:body").style("font-weight", "500").html(d => `<div class="block__text"><p>${ d.title }</p><p>${ new Date(d.timeFrom).toLocaleTimeString("en-US", {
-        hour: "2-digit",
+        hour: "numeric",
         minute: "2-digit",
         hour12: true
       }) }–${ new Date(d.timeTo).toLocaleTimeString("en-US", {
-        hour: "2-digit",
+        hour: "numeric",
         minute: "2-digit",
         hour12: true
       }) }</p></div>`);
