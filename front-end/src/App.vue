@@ -10,10 +10,10 @@
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
-        <template #content="{expanded}">
+        <template #content="{id, expanded}">
           <form @submit.prevent="setSchoolUrl">
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" name="school-name" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
@@ -25,15 +25,15 @@
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
-        <template #content="{expanded}">
+        <template #content="{id, expanded}">
           <form @submit.prevent="addClass">
             <label for="class-code">Class Name or Class Code</label>
-            <input class="centered-text" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" :ref="id + '-input'" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
             <ul v-if="classesSet.length">
-              <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName">
-                <span :style="{ marginRight: '5px'}" class="clickable" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
-                {{ addedClass.displayName }}<span :style="{ marginLeft: '5px'}" class="clickable" @click="classesSet.splice(index, 1)"><strong>&times;</strong></span>
+              <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="class-tag">
+                <button type="button" class="clickable star" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></button>
+                {{ addedClass.displayName }}<button type="button" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="expanded ? 0 : -1"><strong>&times;</strong></button>
               </li>
             </ul>
             <label v-if="classesSet.length">Click &#9734; to lock or unlock each class from your schedule.</label>
@@ -47,10 +47,10 @@
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
-        <template #content="{expanded}">
+        <template #content="{id, expanded}">
           <form @submit.prevent="setClassCredit">
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <label for="credit-amount">Number of Credits</label>
             <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid" :tabindex="expanded ? 0 : -1">
@@ -65,22 +65,22 @@
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
-        <template #content="{expanded}">
+        <template #content="{id, expanded}">
           <form @submit.prevent="generateSchedule">
-            <p class="clickable" @click="expand('university')" :tabindex="expanded ? 0 : -1">
-              <strong>{{ schoolId }}</strong></p>
-            <p class="clickable" @click="expand('amount')" :tabindex="expanded ? 0 : -1">
+            <button type="button" class="clickable" @click="expand('university', true)" :tabindex="expanded ? 0 : -1">
+              <strong>{{ schoolId }}</strong></button>
+            <button type="button" class="clickable" @click="expand('amount', true)" :tabindex="expanded ? 0 : -1">
               <span v-if="classAmountSet">{{ classAmountFormattedLong(true) }}</span>
               <span v-if="classAmountSet && creditAmountSet">, </span>
               <span v-if="creditAmountSet">{{ creditAmountFormattedLong(true) }}</span>
-            </p>
-            <ul v-if="classesSet.length" class="clickable" @click="expand('classes')" :tabindex="expanded ? 0 : -1">
-              <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName">
-                <span :style="{ marginRight: '5px'}"><strong v-if="classesSet[index].locked" class="star">&#9733;</strong><strong v-else>&#9734;</strong></span>
+            </button>
+            <button type="button" v-if="classesSet.length" class="clickable ul" @click="expand('classes', true)" :tabindex="expanded ? 0 : -1">
+              <span v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="li class-tag">
+                <span class="star"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}
-              </li>
-            </ul>
-            <input class="centered-text" type="submit" value="Generate Schedule" :disabled="loading" :tabindex="expanded ? 0 : -1">
+              </span>
+            </button>
+            <input class="centered-text" :ref="id + '-input'" type="submit" value="Generate Schedule" :disabled="loading" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
       </Expandable>
@@ -91,7 +91,7 @@
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
-        <template #content="{expanded}">
+        <template #content="{id, expanded}">
           <div id="d3-schedule" ref="d3-schedule"></div>
           <form v-if="currentScheduleIndex !== null && generatedSchedules !== null" @submit.prevent="swapSchedule">
             <p>
@@ -106,7 +106,7 @@
                 {{ addedClass.displayName }}
               </li>
             </ul>
-            <input class="centered-text" type="submit" value="Shuffle" :disabled="noShuffle" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" :ref="id + '-input'" type="submit" value="Shuffle" :disabled="noShuffle" :tabindex="expanded ? 0 : -1">
           </form>
         </template>
       </Expandable>
@@ -254,9 +254,18 @@ export default Vue.extend({
     Expandable
   },
   methods: {
-    expand(id: SectionId): void {
+    expand(id: SectionId, focus: boolean = false): void {
       setTimeout(() => {
         this.expandedSection = id;
+
+        if (focus && document.activeElement && ["INPUT", "BUTTON"].includes(document.activeElement.tagName)) {
+          const inputEl: HTMLElement = this.$refs[id + "-input"];
+          if (inputEl) {
+            setTimeout(() => {
+              inputEl.focus();
+            }, 505);
+          }
+        }
       }, 5);
     },
     collapse(): void {
@@ -277,7 +286,7 @@ export default Vue.extend({
         this.classesSet = [];
         this.currentScheduleIndex = null;
       } else {
-        this.expand("classes");
+        this.expand("classes", true);
         return;
       }
 
@@ -291,7 +300,7 @@ export default Vue.extend({
         axios.get(`${ backendUrl }/search/${ target }`).then(({ data }) => {
           if (typeof data === "string") {
             this.schoolId = data.toUpperCase();
-            this.expand("classes");
+            this.expand("classes", true);
           } else {
             alert("Unfortunately, something went wrong.");
           }
@@ -369,7 +378,7 @@ export default Vue.extend({
         this.creditAmountSet = null;
       }
 
-      this.expand(this.classesSet.length ? "summary" : "classes");
+      this.expand(this.classesSet.length ? "summary" : "classes", true);
     },
     classAmountFormattedLong(cap: boolean): string {
       if (this.classAmountSet) {
@@ -426,7 +435,7 @@ export default Vue.extend({
 
       if (this.prevProp === propStr && this.generatedSchedules) {
         this.currentScheduleIndex = 0;
-        this.expand("schedules");
+        this.expand("schedules", true);
         return;
       } else {
         this.loading = true;
@@ -443,7 +452,7 @@ export default Vue.extend({
           this.noShuffle = data.length < 2;
           this.generatedSchedules = data;
           this.loading = false;
-          this.expand("schedules");
+          this.expand("schedules", true);
         }).catch((e) => {
           console.error(e);
           alert("Unfortunately, something went wrong.");
@@ -598,6 +607,7 @@ button[type=button] {
   -webkit-appearance: none;
   -webkit-border-radius: 0;
   border: inherit;
+  padding: 0;
   background: inherit;
   font-size: inherit;
   font-family: inherit;
@@ -662,7 +672,7 @@ strong {
   font-weight: 600;
 }
 
-.star {
+.locked {
   color: var(--starColor);
   transition: color 0.5s;
   text-shadow: 0 0 2px #3309;
@@ -672,7 +682,7 @@ strong {
   text-align: center;
 }
 
-.expandable-header__button {
+button.expandable-header__button {
   width: 100%;
   padding: 0 20px;
   display: flex;
@@ -680,11 +690,11 @@ strong {
   align-items: center;
 }
 
-.expandable-header__button span:first-child {
+button.expandable-header__button span:first-child {
   margin: 1em 10px 1em 0;
 }
 
-.expandable-header__button span:last-child {
+button.expandable-header__button span:last-child {
   transition: color 0.5s, transform 0.5s;
 }
 
@@ -716,6 +726,19 @@ strong {
   cursor: not-allowed;
 }
 
+.class-tag > button {
+  padding: 0;
+  margin: 0;
+}
+
+.class-tag .star {
+  margin-right: 5px;
+}
+
+.class-tag > .remove {
+  margin-left: 5px;
+}
+
 form {
   display: flex;
   flex-direction: column;
@@ -743,7 +766,7 @@ form > label:last-child {
   font-weight: 300;
 }
 
-form > p {
+form > p, form > button[type=button] {
   margin-top: 5px;
   margin-bottom: 5px;
 }
@@ -801,13 +824,13 @@ input[type=submit]:disabled {
   cursor: not-allowed;
 }
 
-ul {
+ul, button[type=button].ul {
   display: flex;
   flex-wrap: wrap;
   padding: 0;
 }
 
-li {
+ul > li, button[type=button].ul > span.li {
   display: inline-flex;
   list-style: none;
   font-size: 1em;
