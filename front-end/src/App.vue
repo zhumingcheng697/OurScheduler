@@ -29,14 +29,14 @@
           <form @submit.prevent="allowAddClass && !loading && addClass()">
             <label for="class-code">Class Name or Class Code</label>
             <input class="centered-text" :ref="id + '-input'" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
-            <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" type="submit" value="Add" :ref="id + '-submit'" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="class-tag">
-                <button type="button" :aria-label="addedClass.locked ? `Lock ${addedClass.displayName} into schedule` : `Unlock ${addedClass.locked} from schedule`" class="clickable star" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1">
+                <button type="button" ref="star" :aria-label="addedClass.locked ? `Lock ${addedClass.displayName} into schedule` : `Unlock ${addedClass.locked} from schedule`" class="clickable star" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1" @keydown.prevent.right.down="moveStarRemoveFocus(index, false)">
                   <strong v-if="addedClass.locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong>
                 </button>
                 {{ addedClass.displayName }}
-                <button type="button" :aria-label="`Remove ${addedClass.displayName}`" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="expanded ? 0 : -1">
+                <button type="button" ref="remove" :aria-label="`Remove ${addedClass.displayName}`" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="-1" @keydown.prevent.left.up="moveStarRemoveFocus(index, true)" @keydown.tab="handleShiftTab(index, $event)">
                   <strong>&times;</strong></button>
               </li>
             </ul>
@@ -261,7 +261,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.expandedSection = id;
 
-        if (focus && document.activeElement && document.activeElement.tagName !== "BODY") {
+        if (focus && !!document.activeElement && document.activeElement.tagName !== "BODY") {
           const inputEl: HTMLElement = this.$refs[id + "-input"];
 
           if (inputEl) {
@@ -274,7 +274,7 @@ export default Vue.extend({
     },
     collapse(focus: boolean = false): void {
       setTimeout(() => {
-        if (focus && this.expandedSection && document.activeElement && document.activeElement.tagName !== "BODY") {
+        if (focus && !!this.expandedSection && !!document.activeElement && document.activeElement.tagName !== "BODY") {
           const inputEl: HTMLElement = this.$refs[this.expandedSection + "-toggle"];
 
           if (inputEl) {
@@ -291,7 +291,7 @@ export default Vue.extend({
       setTimeout(() => {
         this.expandedSection = (this.expandedSection === id) ? "" : id;
 
-        if (focus && document.activeElement && document.activeElement.tagName !== "BODY") {
+        if (focus && !!document.activeElement && document.activeElement.tagName !== "BODY") {
           const inputEl: HTMLElement = this.$refs[id + (this.expandedSection ? "-input" : "-toggle")];
 
           if (inputEl) {
@@ -301,6 +301,31 @@ export default Vue.extend({
           }
         }
       }, 5);
+    },
+    moveStarRemoveFocus(index: number, toLeft: boolean): void {
+      const el: HTMLButtonElement[] = this.$refs[toLeft ? "star" : "remove"];
+
+      if (!!el && !!el[index]) {
+        el[index].focus();
+      }
+    },
+    handleShiftTab(index: number, event: KeyboardEvent): void {
+      if (!event.shiftKey) {
+        return;
+      }
+
+      event.preventDefault();
+      if (index === 0) {
+        if (!this.allowAddClass || this.loading) {
+          const inputEl: HTMLElement = this.$refs["classes-input"];
+          inputEl.focus();
+        } else {
+          const submitEl: HTMLElement = this.$refs["classes-submit"];
+          submitEl.focus();
+        }
+      } else {
+        this.moveStarRemoveFocus(index - 1, true);
+      }
     },
     setSchoolUrl(): void {
       if (this.loading) {return;}
