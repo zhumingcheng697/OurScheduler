@@ -36,7 +36,7 @@
                   <strong v-if="addedClass.locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong>
                 </button>
                 {{ addedClass.displayName }}
-                <button type="button" ref="remove" :aria-label="`Remove ${addedClass.displayName}`" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="-1" @keydown.prevent.left.up="moveStarRemoveFocus(index, true)" @keydown.tab="handleShiftTab(index, $event)">
+                <button type="button" ref="remove" :aria-label="`Remove ${addedClass.displayName} from schedule`" class="clickable remove" @click="removeClass(index)" :tabindex="-1" @keydown.prevent.left.up="moveStarRemoveFocus(index, true)" @keydown.tab="handleShiftTab(index, $event)">
                   <strong>&times;</strong></button>
               </li>
             </ul>
@@ -258,50 +258,51 @@ export default Vue.extend({
   },
   methods: {
     expand(id: SectionId, focus: boolean = false): void {
-      setTimeout(() => {
+      this.$nextTick(() => {
         this.expandedSection = id;
 
-        if (focus && !!document.activeElement && document.activeElement.tagName !== "BODY") {
+        if (focus) {
           const inputEl: HTMLElement = this.$refs[id + "-input"];
-
-          if (inputEl) {
-            setTimeout(() => {
-              inputEl.focus();
-            }, 505);
-          }
+          this.moveFocusTo(inputEl, 505);
         }
-      }, 5);
+      });
     },
     collapse(focus: boolean = false): void {
-      setTimeout(() => {
-        if (focus && !!this.expandedSection && !!document.activeElement && document.activeElement.tagName !== "BODY") {
+      this.$nextTick(() => {
+        if (focus && !!this.expandedSection) {
           const inputEl: HTMLElement = this.$refs[this.expandedSection + "-toggle"];
-
-          if (inputEl) {
-            setTimeout(() => {
-              inputEl.focus();
-            }, 505);
-          }
+          this.moveFocusTo(inputEl, 505);
         }
 
         this.expandedSection = "";
-      }, 5);
+      });
     },
     toggle(id: SectionId, focus: boolean = false): void {
-      setTimeout(() => {
+      this.$nextTick(() => {
         this.expandedSection = (this.expandedSection === id) ? "" : id;
 
-        if (focus && !!document.activeElement && document.activeElement.tagName !== "BODY") {
+        if (focus) {
           const inputEl: HTMLElement = this.$refs[id + (this.expandedSection ? "-input" : "-toggle")];
-
-          if (inputEl) {
-            setTimeout(() => {
-              inputEl.focus();
-            }, 505);
-          }
+          this.moveFocusTo(inputEl, 505);
         }
-      }, 5);
+      });
     },
+    moveFocusTo: (() => {
+      let timeoutId: number;
+
+      return (element: HTMLElement, delay: number) => {
+        clearTimeout(timeoutId);
+        const focusedEl = document.activeElement;
+
+        if (!!focusedEl && focusedEl.tagName !== "BODY" && !!element) {
+          timeoutId = setTimeout(() => {
+            if (document.activeElement === focusedEl) {
+              element.focus();
+            }
+          }, delay);
+        }
+      }
+    })(),
     moveStarRemoveFocus(index: number, toLeft: boolean): void {
       const el: HTMLButtonElement[] = this.$refs[toLeft ? "star" : "remove"];
 
@@ -325,6 +326,13 @@ export default Vue.extend({
         }
       } else {
         this.moveStarRemoveFocus(index - 1, true);
+      }
+    },
+    removeClass(index: number): void {
+      const classData = this.classesSet[index];
+
+      if (classData && confirm(`${ classData.displayName } will be removed from your schedule.`)) {
+        this.classesSet.splice(index, 1);
       }
     },
     setSchoolUrl(): void {
