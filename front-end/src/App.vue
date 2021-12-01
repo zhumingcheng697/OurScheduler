@@ -546,7 +546,7 @@ export default Vue.extend({
       const margin = { top: 30, right: 10, bottom: 5, left: 40 }; // Gives space for axes and other margins
       const hours: number = (maxDateValue - minDateValue) / 60 / 60000 + 2 / 3;
       const width: number = 920;
-      const barHeight: number = 1600 * (hours / 24);
+      const barHeight: number = 1250 * (hours / 24);
       const barWidth: number = width - margin.left - margin.right;
       const height: number = barHeight + 30;
 
