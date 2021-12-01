@@ -28,7 +28,7 @@ async function dbInsert(schoolInfo: string, classInfo: ScrapedSection[]): Promis
         for (let j = 0; j < scraped[i][3].length; j++) {
             temp.push([start_time + scraped[i][3][j] * 1440, end_time + scraped[i][3][j] * 1440]);
         }
-        if (scraped[i][5] === 0) {
+        if (!scraped[i][5]) {
             extras.push(temp);
         } else {
             lectures.push(temp);
