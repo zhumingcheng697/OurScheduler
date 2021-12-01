@@ -5,13 +5,13 @@
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
       <Expandable :id="'university'" :expanded="'university' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" class="expandable-header__button clickable" @click="toggle(id)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)">
             <span><strong>Which university or college do you attend?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="setSchoolUrl">
+          <form @submit.prevent="!!schoolNameTemp && !loading && setSchoolUrl()">
             <label for="school-name">School Name</label>
             <input class="centered-text" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1">
@@ -20,35 +20,40 @@
       </Expandable>
       <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" class="expandable-header__button clickable" :disabled="!schoolId" @click="toggle(id)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :disabled="!schoolId" @click="toggle(id)">
             <span><strong>Which classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="addClass">
+          <form @submit.prevent="allowAddClass && !loading && addClass()">
             <label for="class-code">Class Name or Class Code</label>
             <input class="centered-text" :ref="id + '-input'" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Add" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="class-tag">
-                <button type="button" class="clickable star" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></button>
-                {{ addedClass.displayName }}<button type="button" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="expanded ? 0 : -1"><strong>&times;</strong></button>
+                <button type="button" :aria-label="addedClass.locked ? `Lock ${addedClass.displayName} into schedule` : `Unlock ${addedClass.locked} from schedule`" class="clickable star" @click="toggleClassLock(index)" :tabindex="expanded ? 0 : -1">
+                  <strong v-if="addedClass.locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong>
+                </button>
+                {{ addedClass.displayName }}
+                <button type="button" :aria-label="`Remove ${addedClass.displayName}`" class="clickable remove" @click="classesSet.splice(index, 1)" :tabindex="expanded ? 0 : -1">
+                  <strong>&times;</strong></button>
               </li>
             </ul>
-            <label v-if="classesSet.length">Click &#9734; to lock or unlock each class from your schedule.</label>
+            <label v-if="classesSet.length">Click
+              <span aria-label="Star">&#9734;</span> to lock or unlock each class from your schedule.</label>
           </form>
         </template>
       </Expandable>
       <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId">
             <span><strong>How many credits or classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="setClassCredit">
+          <form @submit.prevent="isClassCreditValid && setClassCredit()">
             <label for="class-amount">Number of Classes</label>
             <input class="centered-text" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <label for="credit-amount">Number of Credits</label>
@@ -60,13 +65,13 @@
       </Expandable>
       <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
             <span><strong>Summary</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="generateSchedule">
+          <form @submit.prevent="!loading && generateSchedule()">
             <button type="button" class="clickable" @click="expand('university', true)" :tabindex="expanded ? 0 : -1">
               <strong>{{ schoolId }}</strong></button>
             <button type="button" class="clickable" @click="expand('amount', true)" :tabindex="expanded ? 0 : -1">
@@ -76,7 +81,7 @@
             </button>
             <button type="button" v-if="classesSet.length" class="clickable ul" @click="expand('classes', true)" :tabindex="expanded ? 0 : -1">
               <span v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="li class-tag">
-                <span class="star"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></span>
+                <span class="star" :aria-label="addedClass.locked ? `Locked` : `Not locked`"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}
               </span>
             </button>
@@ -86,14 +91,14 @@
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
             <span><strong>Schedules</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
           <div id="d3-schedule" ref="d3-schedule"></div>
-          <form v-if="currentScheduleIndex !== null && generatedSchedules !== null" @submit.prevent="swapSchedule">
+          <form v-if="currentScheduleIndex !== null && generatedSchedules !== null" @submit.prevent="!noShuffle && swapSchedule()">
             <p>
               <strong>{{ schoolId }}</strong></p>
             <p>
@@ -111,7 +116,7 @@
         </template>
       </Expandable>
     </div>
-    <footer class="centered-text">&COPY; 2021 Hackers Union</footer>
+    <footer class="centered-text"><span aria-label="Copyright">&COPY;</span> 2021 Hackers Union</footer>
   </div>
 </template>
 
@@ -197,12 +202,10 @@ export default Vue.extend({
     }
   },
   mounted(): void {
+    setTimeout(() => {
+      this.expand("university");
+    }, 100);
     keepAlive();
-    this.expand("university");
-    // this.expand("schedules");
-    // this.runD3([["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]]);
-    // this.currentScheduleIndex = 0;
-    // this.generatedSchedules = [[["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [660, 740]], ["OBJECT ORIENTED PROGRAMMING", [3540, 3620]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [1020, 1100]], ["OBJECT ORIENTED PROGRAMMING", [3900, 3980]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [570, 650]], ["OBJECT ORIENTED PROGRAMMING", [3450, 3530]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6240, 6410]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6420, 6590]]], [["OBJECT ORIENTED PROGRAMMING", [930, 1010]], ["OBJECT ORIENTED PROGRAMMING", [3810, 3890]], ["OBJECT ORIENTED PROGRAMMING", [6600, 6770]]]];
   },
   computed: {
     allowAddClass(): boolean {
@@ -248,7 +251,7 @@ export default Vue.extend({
     },
     currentScheduleCreditAmountFormatted(): string {
       return this.currentScheduleCreditSum + " Credit" + (this.currentScheduleCreditSum === 1 ? "" : "es");
-    },
+    }
   },
   components: {
     Expandable
