@@ -1,11 +1,11 @@
 <template>
-  <div id="app" :class="{loading}">
+  <div id="app" :class="{loading}" @keydown.esc="collapse(true)">
     <div class="top">
       <h1>{{ projectName }}</h1>
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
       <Expandable :id="'university'" :expanded="'university' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)">
             <span><strong>Which university or college do you attend?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -20,7 +20,7 @@
       </Expandable>
       <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :disabled="!schoolId" @click="toggle(id)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :disabled="!schoolId" :ref="id + '-toggle'" @click="toggle(id, true)">
             <span><strong>Which classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -47,7 +47,7 @@
       </Expandable>
       <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId">
             <span><strong>How many credits or classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -65,7 +65,7 @@
       </Expandable>
       <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
             <span><strong>Summary</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -91,7 +91,7 @@
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" @click="toggle(id)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
             <span><strong>Schedules</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -261,8 +261,9 @@ export default Vue.extend({
       setTimeout(() => {
         this.expandedSection = id;
 
-        if (focus && document.activeElement && ["INPUT", "BUTTON"].includes(document.activeElement.tagName)) {
+        if (focus && document.activeElement && document.activeElement.tagName !== "BODY") {
           const inputEl: HTMLElement = this.$refs[id + "-input"];
+
           if (inputEl) {
             setTimeout(() => {
               inputEl.focus();
@@ -271,14 +272,34 @@ export default Vue.extend({
         }
       }, 5);
     },
-    collapse(): void {
+    collapse(focus: boolean = false): void {
       setTimeout(() => {
+        if (focus && this.expandedSection && document.activeElement && document.activeElement.tagName !== "BODY") {
+          const inputEl: HTMLElement = this.$refs[this.expandedSection + "-toggle"];
+
+          if (inputEl) {
+            setTimeout(() => {
+              inputEl.focus();
+            }, 505);
+          }
+        }
+
         this.expandedSection = "";
       }, 5);
     },
-    toggle(id: SectionId): void {
+    toggle(id: SectionId, focus: boolean = false): void {
       setTimeout(() => {
         this.expandedSection = (this.expandedSection === id) ? "" : id;
+
+        if (focus && document.activeElement && document.activeElement.tagName !== "BODY") {
+          const inputEl: HTMLElement = this.$refs[id + (this.expandedSection ? "-input" : "-toggle")];
+
+          if (inputEl) {
+            setTimeout(() => {
+              inputEl.focus();
+            }, 505);
+          }
+        }
       }, 5);
     },
     setSchoolUrl(): void {
