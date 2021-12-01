@@ -901,6 +901,7 @@ ul > li, button[type=button].ul > span.li {
   align-items: center;
   color: var(--txtColor);
   transition: color 0.5s, background-color 0.5s;
+  text-align: center;
 }
 
 footer {
