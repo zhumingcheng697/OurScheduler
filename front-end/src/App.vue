@@ -301,7 +301,7 @@ export default Vue.extend({
             }
           }, delay);
         }
-      }
+      };
     })(),
     moveStarRemoveFocus(index: number, toLeft: boolean): void {
       const el: HTMLButtonElement[] = this.$refs[toLeft ? "star" : "remove"];
@@ -540,20 +540,20 @@ export default Vue.extend({
           day: Math.floor(schedules[i][1][0] / 1440)
         });
       }
-      // Make an array of dates to use for our yScale later on
-      const minDateValue: number = d3.min(calendarEvents.map((d: CalendarEvent) => new Date(d.timeFrom)))?.valueOf() ?? START_TIME;
-      const maxDateValue: number = d3.max(calendarEvents.map((d: CalendarEvent) => new Date(d.timeTo)))?.valueOf() ?? END_TIME;
-      const margin = { top: 30, right: 10, bottom: 5, left: 40 }; // Gives space for axes and other margins
+
+      const minDateValue: number = d3.min(calendarEvents.map((d: CalendarEvent) => d.timeFrom)) ?? START_TIME;
+      const maxDateValue: number = d3.max(calendarEvents.map((d: CalendarEvent) => d.timeTo)) ?? END_TIME;
+      const margin = { top: 30, right: 10, bottom: 5, left: 40 };
       const hours: number = (maxDateValue - minDateValue) / 60 / 60000 + 2 / 3;
       const width: number = 920;
-      const barHeight: number = 1250 * (hours / 24);
+      const barHeight: number = 1250 * (hours / (24 + 2 / 3));
       const barWidth: number = width - margin.left - margin.right;
-      const height: number = barHeight + 30;
+      const height: number = barHeight + margin.top + margin.bottom;
 
       // Create the SVG element
       const svg = d3.create("svg").attr("width", width).attr("height", height);
       // All further code additions will go just below this line
-      const yScale = d3.scaleTime().domain([new Date(Math.max(START_TIME, minDateValue - 1 / 3 * 60 * 60 * 1000)), new Date(Math.min(END_TIME, maxDateValue + 1 / 3 * 60 * 60 * 1000))]).range([margin.top, height - margin.bottom]);
+      const yScale = d3.scaleTime().domain([new Date(minDateValue - 1 / 3 * 60 * 60 * 1000), new Date(maxDateValue + 1 / 3 * 60 * 60 * 1000)]).range([margin.top, height - margin.bottom]);
       const yAxis = d3.axisLeft<Date>(yScale).ticks(hours).tickFormat((d: Date) => d.toLocaleTimeString("en-US", {
         hour: "numeric",
         hour12: true
