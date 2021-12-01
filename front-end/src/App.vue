@@ -653,7 +653,7 @@ rect {
   transition: fill 0.5s, stroke 0.5s;
 }
 
-h1, h2, span, p, g {
+h1, h2, span, p, g, strong {
   color: var(--txtColor);
   transition: color 0.5s;
 }
@@ -694,6 +694,7 @@ button.expandable-header__button {
 }
 
 button.expandable-header__button span:first-child {
+  text-align: start;
   margin: 1em 10px 1em 0;
 }
 
