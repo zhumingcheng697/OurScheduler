@@ -732,6 +732,7 @@ strong {
 }
 
 button.expandable-header__button {
+  transition: background-color 0.5s;
   width: 100%;
   padding: 0 20px;
   display: flex;
@@ -759,10 +760,6 @@ button.expandable-header__button span:last-child {
   transition: height 0.5s, color 0.5s, background-color 0.5s, border-top-color 0.5s, border-right-color 0.5s, border-bottom-color 0.5s, border-left-color 0.5s, opacity 0.5s;
 }
 
-.expandable .expandable-header__button {
-  transition: background-color 0.5s;
-}
-
 .expandable .expandable-header__button:not(:disabled):hover,
 .expandable .expandable-header__button:not(:disabled):focus {
   background: var(--expandableHoverColor);
@@ -779,9 +776,12 @@ button.expandable-header__button span:last-child {
 .class-tag > button {
   padding: 0;
   margin: 0;
+  background: var(--tagColor);
+  color: var(--txtColor);
+  transition: color 0.5s, background-color 0.5s;
 }
 
-.class-tag .star {
+.class-tag > .star {
   margin-right: 5px;
 }
 
