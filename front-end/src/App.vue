@@ -176,9 +176,7 @@ export default Vue.extend({
     expandedSection(toBeExpanded: string): void {
       switch (toBeExpanded) {
         case "university":
-          if (this.schoolId) {
-            this.schoolNameTemp = this.schoolId;
-          }
+          this.schoolNameTemp = this.schoolId;
           break;
         case "classes":
           this.classTemp = "";
@@ -193,6 +191,9 @@ export default Vue.extend({
           } else if (this.creditAmountSet) {
             this.creditAmountTemp = this.creditAmountFormatted;
             this.classAmountTemp = "";
+          } else {
+            this.classAmountTemp = "";
+            this.creditAmountTemp = "";
           }
           break;
       }
