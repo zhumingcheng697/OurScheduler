@@ -5,22 +5,22 @@
       <h2 class="centered-text">Welcome to {{ projectName }}, your best college schedule maker.</h2>
       <Expandable :id="'university'" :expanded="'university' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @keydown.space.enter="toggle(id, true)" @mousedown="toggle(id, false)">
             <span><strong>Which university or college do you attend?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="!!schoolNameTemp && !loading && setSchoolUrl()">
+          <form @submit.prevent>
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1">
-            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1" @keydown.enter="!!schoolNameTemp && !loading && setSchoolUrl(true)">
+            <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1" @keydown.space.enter="setSchoolUrl(true)" @mousedown="setSchoolUrl(false)">
           </form>
         </template>
       </Expandable>
       <Expandable :id="'classes'" :expanded="'classes' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :disabled="!schoolId" :ref="id + '-toggle'" @click="toggle(id, true)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :disabled="!schoolId" :ref="id + '-toggle'" @keydown.space.enter="toggle(id, true)" @mousedown="toggle(id, false)">
             <span><strong>Which classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -47,51 +47,51 @@
       </Expandable>
       <Expandable :id="'amount'" :expanded="'amount' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @keydown.space.enter="toggle(id, true)" @mousedown="toggle(id, false)" :disabled="!schoolId">
             <span><strong>How many credits or classes do you plan to take?</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="isClassCreditValid && setClassCredit()">
+          <form @submit.prevent>
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
             <label for="credit-amount">Number of Credits</label>
-            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1">
-            <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
+            <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid" :tabindex="expanded ? 0 : -1" @keydown.space.enter="setClassCredit(true)" @mousedown="setClassCredit(false)">
             <label>You have selected {{ classesSet.length }} class{{ classesSet.length === 1 ? "" : "es" }} worth of {{ creditSum }} credit{{ creditSum === 1 ? "" : "s" }} so far.</label>
           </form>
         </template>
       </Expandable>
       <Expandable :id="'summary'" :expanded="'summary' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @keydown.space.enter="toggle(id, true)" @mousedown="toggle(id, false)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet)">
             <span><strong>Summary</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
         </template>
         <template #content="{id, expanded}">
-          <form @submit.prevent="!loading && generateSchedule()">
-            <button type="button" class="clickable" @click="expand('university', true)" :tabindex="expanded ? 0 : -1">
+          <form @submit.prevent>
+            <button type="button" class="clickable" @keydown.space.enter="expand('university', true)" @mousedown="expand('university', false)" :tabindex="expanded ? 0 : -1">
               <strong>{{ schoolId }}</strong></button>
-            <button type="button" class="clickable" @click="expand('amount', true)" :tabindex="expanded ? 0 : -1">
+            <button type="button" class="clickable" @keydown.space.enter="expand('amount', true)" @mousedown="expand('amount', false)" :tabindex="expanded ? 0 : -1">
               <span v-if="classAmountSet">{{ classAmountFormattedLong(true) }}</span>
               <span v-if="classAmountSet && creditAmountSet">, </span>
               <span v-if="creditAmountSet">{{ creditAmountFormattedLong(true) }}</span>
             </button>
-            <button type="button" v-if="classesSet.length" class="clickable ul" @click="expand('classes', true)" :tabindex="expanded ? 0 : -1">
+            <button type="button" v-if="classesSet.length" class="clickable ul" @keydown.space.enter="expand('classes', true)" @mousedown="expand('classes', false)" :tabindex="expanded ? 0 : -1">
               <span v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="li class-tag">
                 <span class="star" :aria-label="addedClass.locked ? `Locked` : `Not locked`"><strong v-if="classesSet[index].locked" class="locked">&#9733;</strong><strong v-else>&#9734;</strong></span>
                 {{ addedClass.displayName }}
               </span>
             </button>
-            <input class="centered-text" :ref="id + '-input'" type="submit" value="Generate Schedule" :disabled="loading" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" :ref="id + '-input'" type="submit" value="Generate Schedule" :disabled="loading" :tabindex="expanded ? 0 : -1" @keydown.space.enter="generateSchedule(true)" @mousedown="generateSchedule(false)">
           </form>
         </template>
       </Expandable>
       <Expandable :id="'schedules'" :expanded="'schedules' === expandedSection">
         <template #header="{id, expanded}">
-          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @click="toggle(id, true)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
+          <button type="button" :aria-label="expanded ? `Close ${id} section` : `Expand ${id} section`" class="expandable-header__button clickable" :ref="id + '-toggle'" @keydown.space.enter="toggle(id, true)" @mousedown="toggle(id, false)" :disabled="!schoolId || !classesSet.length || (!classAmountSet && !creditAmountSet) || !generatedSchedules || currentScheduleIndex === null">
             <span><strong>Schedules</strong></span>
             <span :style="{ transform: `rotate(${expanded ? 90 : 0}deg)` }"><strong>&rsaquo;</strong></span>
           </button>
@@ -294,7 +294,7 @@ export default Vue.extend({
         clearTimeout(timeoutId);
         const focusedEl = document.activeElement;
 
-        if (!!focusedEl && focusedEl.tagName !== "BODY" && !!element) {
+        if (!!focusedEl && !!element) {
           timeoutId = setTimeout(() => {
             if (document.activeElement === focusedEl) {
               element.focus();
@@ -335,7 +335,7 @@ export default Vue.extend({
         this.classesSet.splice(index, 1);
       }
     },
-    setSchoolUrl(): void {
+    setSchoolUrl(focus: boolean = false): void {
       if (this.loading) {return;}
 
       if (this.schoolId !== this.schoolNameTemp) {
@@ -343,7 +343,7 @@ export default Vue.extend({
         this.classesSet = [];
         this.currentScheduleIndex = null;
       } else {
-        this.expand("classes", true);
+        this.expand("classes", focus);
         return;
       }
 
@@ -355,12 +355,16 @@ export default Vue.extend({
         const target = this.schoolNameTemp;
 
         axios.get(`${ backendUrl }/search/${ target }`).then(({ data }) => {
-          if (typeof data === "string") {
+          if (!!data && typeof data === "string") {
             this.schoolId = data.toUpperCase();
-            this.expand("classes", true);
+            this.expand("classes", focus);
           } else {
             alert("Unfortunately, something went wrong.");
           }
+          this.loading = false;
+        }, (e) => {
+          console.error(e);
+          alert("Unfortunately, something went wrong.");
           this.loading = false;
         }).catch((e) => {
           console.error(e);
@@ -401,6 +405,10 @@ export default Vue.extend({
             alert("Unfortunately, this class does not exist.");
             this.loading = false;
           }
+        }, (e) => {
+          console.error(e);
+          alert("Unfortunately, something went wrong.");
+          this.loading = false;
         }).catch((e) => {
           console.error(e);
           alert("Unfortunately, something went wrong.");
@@ -416,7 +424,7 @@ export default Vue.extend({
       this.classesSet[index].locked = !this.classesSet[index].locked;
       this.currentScheduleIndex = null;
     },
-    setClassCredit(): void {
+    setClassCredit(focus: boolean = false): void {
       if (this.classAmountTemp !== this.classAmountFormatted || this.creditAmountTemp !== this.creditAmountFormatted) {
         this.currentScheduleIndex = null;
       }
@@ -435,7 +443,7 @@ export default Vue.extend({
         this.creditAmountSet = null;
       }
 
-      this.expand(this.classesSet.length ? "summary" : "classes", true);
+      this.expand(this.classesSet.length ? "summary" : "classes", focus);
     },
     classAmountFormattedLong(cap: boolean): string {
       if (this.classAmountSet) {
@@ -449,7 +457,7 @@ export default Vue.extend({
       }
       return "";
     },
-    generateSchedule(): void {
+    generateSchedule(focus: boolean = false): void {
       if (this.loading) {return;}
 
       let notEnoughClassSelected = false;
@@ -492,7 +500,7 @@ export default Vue.extend({
 
       if (this.prevProp === propStr && this.generatedSchedules) {
         this.currentScheduleIndex = 0;
-        this.expand("schedules", true);
+        this.expand("schedules", focus);
         return;
       } else {
         this.loading = true;
@@ -509,7 +517,11 @@ export default Vue.extend({
           this.noShuffle = data.length < 2;
           this.generatedSchedules = data;
           this.loading = false;
-          this.expand("schedules", true);
+          this.expand("schedules", focus);
+        }, (e) => {
+          console.error(e);
+          alert("Unfortunately, something went wrong.");
+          this.loading = false;
         }).catch((e) => {
           console.error(e);
           alert("Unfortunately, something went wrong.");
@@ -546,7 +558,7 @@ export default Vue.extend({
       const margin = { top: 30, right: 10, bottom: 5, left: 40 };
       const hours: number = (maxDateValue - minDateValue) / 60 / 60000 + 2 / 3;
       const width: number = 920;
-      const barHeight: number = 1250 * (hours / (24 + 2 / 3));
+      const barHeight: number = 1350 * (hours / (24 + 2 / 3));
       const barWidth: number = width - margin.left - margin.right;
       const height: number = barHeight + margin.top + margin.bottom;
 
