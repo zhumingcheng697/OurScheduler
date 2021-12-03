@@ -13,7 +13,7 @@
         <template #content="{id, expanded}">
           <form @submit.prevent>
             <label for="school-name">School Name</label>
-            <input class="centered-text" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1" @keydown.enter="!!schoolNameTemp && !loading && setSchoolUrl(true)">
+            <input class="centered-text" enterkeyhint="search" id="school-name" name="school-name" :ref="id + '-input'" type="text" v-model="schoolNameTemp" placeholder="Zoom University" autocomplete="organization" :tabindex="expanded ? 0 : -1" @keydown.enter="!!schoolNameTemp && !loading && setSchoolUrl(true)">
             <input class="centered-text" type="submit" value="Search" :disabled="!schoolNameTemp || loading" :tabindex="expanded ? 0 : -1" @keydown.space.enter="setSchoolUrl(true)" @mousedown="setSchoolUrl(false)">
           </form>
         </template>
@@ -28,7 +28,7 @@
         <template #content="{id, expanded}">
           <form @submit.prevent="allowAddClass && !loading && addClass()">
             <label for="class-code">Class Name or Class Code</label>
-            <input class="centered-text" :ref="id + '-input'" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
+            <input class="centered-text" enterkeyhint="search" :ref="id + '-input'" id="class-code" name="class-code" type="text" v-model="classTemp" placeholder="Intro to Handwashing / HW 101" autocomplete="off" :tabindex="expanded ? 0 : -1">
             <input class="centered-text" type="submit" value="Add" :ref="id + '-submit'" :disabled="!allowAddClass || loading" :tabindex="expanded ? 0 : -1">
             <ul v-if="classesSet.length">
               <li v-for="(addedClass, index) in classesSet" :key="addedClass.displayName" class="class-tag">
@@ -55,9 +55,9 @@
         <template #content="{id, expanded}">
           <form @submit.prevent>
             <label for="class-amount">Number of Classes</label>
-            <input class="centered-text" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
+            <input class="centered-text" enterkeyhint="done" :ref="id + '-input'" type="text" id="class-amount" name="class-amount" v-model="classAmountTemp" placeholder="4-5" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
             <label for="credit-amount">Number of Credits</label>
-            <input class="centered-text" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
+            <input class="centered-text" enterkeyhint="done" type="text" id="credit-amount" name="credit-amount" v-model="creditAmountTemp" placeholder="12-18" autocomplete="off" :tabindex="expanded ? 0 : -1" @keydown.enter="!!isClassCreditValid && setClassCredit(true)">
             <input class="centered-text" type="submit" value="Confirm" :disabled="!isClassCreditValid" :tabindex="expanded ? 0 : -1" @keydown.space.enter="setClassCredit(true)" @mousedown="setClassCredit(false)">
             <label>You have selected {{ classesSet.length }} class{{ classesSet.length === 1 ? "" : "es" }} worth of {{ creditSum }} credit{{ creditSum === 1 ? "" : "s" }} so far.</label>
           </form>
